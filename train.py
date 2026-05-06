@@ -167,6 +167,8 @@ def train(args) -> NoReturn:
     output_channels = configs['model']['output_channels']
     condition_size = configs['model']['condition_size']
     use_text_ratio = configs['model']['use_text_ratio']
+    use_transformer_bottleneck = configs['model'].get('use_transformer_bottleneck', False)
+    transformer_config = configs['model'].get('transformer_config', None)
     
     # Configuration of the trainer
     num_nodes = configs['train']['num_nodes']
@@ -207,6 +209,8 @@ def train(args) -> NoReturn:
         input_channels=input_channels,
         output_channels=output_channels,
         condition_size=condition_size,
+        use_transformer_bottleneck=use_transformer_bottleneck,
+        transformer_config=transformer_config,
     )
 
     # loss function
@@ -256,7 +260,7 @@ def train(args) -> NoReturn:
         devices='auto',
         strategy='ddp_find_unused_parameters_true',
         num_nodes=num_nodes,
-        precision="32-true",
+        precision="bf16-mixed",
         logger=None,
         callbacks=callbacks,
         fast_dev_run=False,

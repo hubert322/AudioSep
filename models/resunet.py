@@ -1,10 +1,11 @@
 import numpy as np
-from typing import Dict, List, NoReturn, Tuple
+from typing import Dict, List, NoReturn, Optional, Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchlibrosa.stft import STFT, ISTFT, magphase
 from models.base import Base, init_layer, init_bn, act
+from models.transformer_bottleneck import TransformerBottleneck
 
 
 class FiLM(nn.Module):
@@ -265,7 +266,8 @@ class DecoderBlockRes1B(nn.Module):
 
 
 class ResUNet30_Base(nn.Module, Base):
-    def __init__(self, input_channels, output_channels):
+    def __init__(self, input_channels, output_channels,
+                 use_transformer_bottleneck=False, transformer_config=None):
         super(ResUNet30_Base, self).__init__()
 
         window_size = 2048
@@ -360,14 +362,27 @@ class ResUNet30_Base(nn.Module, Base):
             momentum=momentum,
             has_film=True,
         )
-        self.conv_block7a = EncoderBlockRes1B(
-            in_channels=384,
-            out_channels=384,
-            kernel_size=(3, 3),
-            downsample=(1, 1),
-            momentum=momentum,
-            has_film=True,
-        )
+        self.use_transformer_bottleneck = use_transformer_bottleneck
+        if use_transformer_bottleneck:
+            cfg = transformer_config or {}
+            self.transformer_bottleneck = TransformerBottleneck(
+                audio_channels=384,
+                text_embed_dim=cfg.get('text_embed_dim', 512),
+                d_model=cfg.get('d_model', 384),
+                nhead=cfg.get('nhead', 8),
+                num_layers=cfg.get('num_layers', 4),
+                dim_feedforward=cfg.get('dim_feedforward', 1536),
+                dropout=cfg.get('dropout', 0.1),
+            )
+        else:
+            self.conv_block7a = EncoderBlockRes1B(
+                in_channels=384,
+                out_channels=384,
+                kernel_size=(3, 3),
+                downsample=(1, 1),
+                momentum=momentum,
+                has_film=True,
+            )
         self.decoder_block1 = DecoderBlockRes1B(
             in_channels=384,
             out_channels=384,
@@ -519,7 +534,7 @@ class ResUNet30_Base(nn.Module, Base):
         return waveform
 
 
-    def forward(self, mixtures, film_dict):
+    def forward(self, mixtures, film_dict, condition=None):
         """
         Args:
           input: (batch_size, segment_samples, channels_num)
@@ -559,7 +574,10 @@ class ResUNet30_Base(nn.Module, Base):
         x4_pool, x4 = self.encoder_block4(x3_pool, film_dict['encoder_block4'])  # x4_pool: (bs, 256, T / 16, F / 16)
         x5_pool, x5 = self.encoder_block5(x4_pool, film_dict['encoder_block5'])  # x5_pool: (bs, 384, T / 32, F / 32)
         x6_pool, x6 = self.encoder_block6(x5_pool, film_dict['encoder_block6'])  # x6_pool: (bs, 384, T / 32, F / 64)
-        x_center, _ = self.conv_block7a(x6_pool, film_dict['conv_block7a'])  # (bs, 384, T / 32, F / 64)
+        if self.use_transformer_bottleneck:
+            x_center = self.transformer_bottleneck(x6_pool, condition)  # (bs, 384, T / 32, F / 64)
+        else:
+            x_center, _ = self.conv_block7a(x6_pool, film_dict['conv_block7a'])  # (bs, 384, T / 32, F / 64)
         x7 = self.decoder_block1(x_center, x6, film_dict['decoder_block1'])  # (bs, 384, T / 32, F / 32)
         x8 = self.decoder_block2(x7, x5, film_dict['decoder_block2'])  # (bs, 384, T / 16, F / 16)
         x9 = self.decoder_block3(x8, x4, film_dict['decoder_block3'])  # (bs, 256, T / 8, F / 8)
@@ -619,12 +637,17 @@ def get_film_meta(module):
 
 
 class ResUNet30(nn.Module):
-    def __init__(self, input_channels, output_channels, condition_size):
+    def __init__(self, input_channels, output_channels, condition_size,
+                 use_transformer_bottleneck=False, transformer_config=None):
         super(ResUNet30, self).__init__()
+
+        self.use_transformer_bottleneck = use_transformer_bottleneck
 
         self.base = ResUNet30_Base(
             input_channels=input_channels, 
             output_channels=output_channels,
+            use_transformer_bottleneck=use_transformer_bottleneck,
+            transformer_config=transformer_config,
         )
         
         self.film_meta = get_film_meta(
@@ -648,6 +671,7 @@ class ResUNet30(nn.Module):
         output_dict = self.base(
             mixtures=mixtures, 
             film_dict=film_dict,
+            condition=conditions if self.use_transformer_bottleneck else None,
         )
 
         return output_dict
@@ -685,6 +709,7 @@ class ResUNet30(nn.Module):
             chunk_out = self.base(
                 mixtures=chunk_in, 
                 film_dict=film_dict,
+                condition=conditions if self.use_transformer_bottleneck else None,
             )['waveform']
             
             chunk_out_np = chunk_out.squeeze(0).cpu().data.numpy()
@@ -703,6 +728,7 @@ class ResUNet30(nn.Module):
                 chunk_out = self.base(
                     mixtures=chunk_in, 
                     film_dict=film_dict,
+                    condition=conditions if self.use_transformer_bottleneck else None,
                 )['waveform']
 
                 chunk_out_np = chunk_out.squeeze(0).cpu().data.numpy()
