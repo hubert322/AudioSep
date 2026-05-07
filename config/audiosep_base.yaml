@@ -3,7 +3,7 @@ task_name: AudioSep
 
 data:
     datafiles:
-        - 'datafiles/template.json'
+        - 'datafiles/fsd50k_dev_auto_caption_abs.json'
 
     sampling_rate: 32000
     segment_seconds: 5
