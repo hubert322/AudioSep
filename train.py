@@ -263,8 +263,9 @@ def train(args) -> NoReturn:
         precision="bf16-mixed",
         logger=None,
         callbacks=callbacks,
-        fast_dev_run=False,
+        fast_dev_run=args.fast_dev_run,
         max_epochs=-1,
+        max_steps=args.num_steps,
         log_every_n_steps=50,
         use_distributed_sampler=True,
         sync_batchnorm=sync_batchnorm,
@@ -303,6 +304,19 @@ if __name__ == "__main__":
         required=True,
         default='',
         help="Path of pretrained checkpoint for finetuning.",
+    )
+
+    parser.add_argument(
+        "--fast_dev_run",
+        action="store_true",
+        help="Run a single batch for smoke testing.",
+    )
+
+    parser.add_argument(
+        "--num_steps",
+        type=int,
+        default=-1,
+        help="Maximum number of steps to train.",
     )
 
     args = parser.parse_args()
