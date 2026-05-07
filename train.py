@@ -15,6 +15,7 @@ from data.waveform_mixers import SegmentMixer
 from models.clap_encoder import CLAP_Encoder
 from callbacks.base import CheckpointEveryNSteps
 from optimizers.lr_schedulers import get_lr_lambda
+from lightning.pytorch.loggers import WandbLogger, TensorBoardLogger
 
 
 def get_dirs(
@@ -251,7 +252,22 @@ def train(args) -> NoReturn:
         save_step_frequency=save_step_frequency,
     )
 
-    summary_writer = SummaryWriter(log_dir=tf_logs_dir)
+    # Loggers
+    tb_logger = TensorBoardLogger(
+        save_dir=workspace,
+        name="tf_logs",
+        version="{},devices={}".format(pathlib.Path(config_yaml).stem, devices_num)
+    )
+
+    loggers = [tb_logger]
+
+    if not args.no_wandb:
+        wandb_logger = WandbLogger(
+            project="AudioSep",
+            name="{},devices={}".format(pathlib.Path(config_yaml).stem, devices_num),
+            config=configs
+        )
+        loggers.append(wandb_logger)
 
     callbacks = [checkpoint_every_n_steps]
 
@@ -261,7 +277,7 @@ def train(args) -> NoReturn:
         strategy='ddp_find_unused_parameters_true',
         num_nodes=num_nodes,
         precision="bf16-mixed",
-        logger=None,
+        logger=loggers,
         callbacks=callbacks,
         fast_dev_run=args.fast_dev_run,
         max_epochs=-1,
@@ -317,6 +333,12 @@ if __name__ == "__main__":
         type=int,
         default=-1,
         help="Maximum number of steps to train.",
+    )
+
+    parser.add_argument(
+        "--no_wandb",
+        action="store_true",
+        help="Disable WandB logging.",
     )
 
     args = parser.parse_args()
