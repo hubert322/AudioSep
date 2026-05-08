@@ -45,11 +45,21 @@ The pipeline is set up for **Dual Logging** (WandB + TensorBoard).
 
 Each user should use their own **`--workspace`** directory to avoid overwriting checkpoints.
 
-### Standard Training (with WandB)
+### Standard Training (Base Model)
+Use this for the standard AudioSep architecture.
 ```bash
 python train.py \
     --workspace workspace/YourName \
     --config_yaml config/audiosep_base.yaml \
+    --resume_checkpoint_path checkpoint/audiosep_base_4M_steps.ckpt
+```
+
+### Transformer Training (Advanced)
+Use this if you want to enable the Transformer bottleneck for better semantic alignment.
+```bash
+python train.py \
+    --workspace workspace/YourName_Transformer \
+    --config_yaml config/audiosep_transformer.yaml \
     --resume_checkpoint_path checkpoint/audiosep_base_4M_steps.ckpt
 ```
 
