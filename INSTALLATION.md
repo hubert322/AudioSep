@@ -81,6 +81,31 @@ python train.py \
     --fast_dev_run
 ```
 
-## 💾 4. Checkpoints
-- **Frequency**: Checkpoints are saved every **2,000 steps** (configured in `audiosep_base.yaml`). This is optimized for 4-8 hour GPU sessions.
+## 📂 4. Preparing Datafiles
+
+The configuration files expect dataset JSONs with **absolute paths** to the audio files. If you have a JSON with relative paths, you can use the `fix_json_paths.py` script to generate a version compatible with the HPC.
+
+### Running the path fixer:
+```bash
+python fix_json_paths.py \
+    --input datafiles/fsd50k_dev_auto_caption.json \
+    --base_dir /scratch/th3622/path/to/fsd50k/audio/ \
+    --suffix _abs
+```
+This will create `datafiles/fsd50k_dev_auto_caption_abs.json` with the correct absolute paths.
+
+### Update your Config:
+After generating the `_abs.json` file, make sure to update your YAML configuration (e.g., `config/audiosep_base.yaml`) to point to the new file:
+```yaml
+data:
+    datafiles:
+        - 'datafiles/fsd50k_dev_auto_caption_abs.json'
+```
+
+> [!IMPORTANT]
+> **HPC Permissions**: If you are sharing datasets across accounts on NYU Greene, ensure the dataset directory is readable by your teammates:
+> `chmod -R 755 /scratch/your_netid/path/to/datasets`
+
+## 💾 5. Checkpoints
+- **Frequency**: Checkpoints are saved every **2,000 steps** (configured in your YAML config). This is optimized for 4-8 hour GPU sessions.
 - **Location**: Found in `workspace/checkpoints/train/`.
