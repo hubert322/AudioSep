@@ -11,6 +11,14 @@ except ImportError:
     def tqdm(iterable, total=None):
         return iterable
 
+def check_ffmpeg():
+    """Verify that ffmpeg is installed and accessible."""
+    try:
+        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
 def resample_file(task):
     src_path, dst_path, target_sr = task
     
@@ -32,10 +40,17 @@ def resample_file(task):
     ]
     
     try:
-        subprocess.run(cmd, check=True)
+        # Capture stderr to provide meaningful error messages
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"FFmpeg Error for {src_path.name}:\n{result.stderr}")
+            return False
         return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error processing {src_path}: {e}")
+    except FileNotFoundError:
+        print("Error: 'ffmpeg' command not found. Please ensure ffmpeg is installed and in your PATH.")
+        return False
+    except Exception as e:
+        print(f"Unexpected error processing {src_path.name}: {e}")
         return False
 
 def main():
@@ -50,6 +65,11 @@ def main():
     src_root = Path(args.src)
     dst_root = Path(args.dst)
     
+    if not check_ffmpeg():
+        print("CRITICAL ERROR: 'ffmpeg' is not installed or not found in your PATH.")
+        print("On NYU Greene, make sure to run 'module load ffmpeg' first.")
+        return
+
     if not src_root.exists():
         print(f"Error: Source directory {src_root} does not exist.")
         return
