@@ -146,6 +146,8 @@ def train(args) -> NoReturn:
         gpus: int, number of GPUs to train
         config_yaml: str
     """
+    # Set float32 matmul precision for performance on Tensor Core GPUs
+    torch.set_float32_matmul_precision('high')
 
     # arguments & parameters
     workspace = args.workspace
