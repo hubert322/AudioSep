@@ -4,12 +4,9 @@
 #SBATCH --cpus-per-task=12
 #SBATCH --mem=16GB
 #SBATCH --time=04:00:00
-#SBATCH --partition=base
 #SBATCH --output=resample_%j.out
 #SBATCH --account=torch_pr_1026_general
-
-# Ensure python output shows up in the log immediately
-export PYTHONUNBUFFERED=1
+#SBATCH --error=%x-%j.err
 
 # Load ffmpeg (Standard on NYU Greene)
 module load ffmpeg
@@ -31,25 +28,16 @@ SRC_EVAL="$FSD_ROOT/FSD50K.eval_audio"
 DST_EVAL_16K="$FSD_ROOT/FSD50K.eval_audio_16k"
 DST_EVAL_32K="$FSD_ROOT/FSD50K.eval_audio_32k"
 
-echo "Launching Resampling Tasks in Parallel..."
+echo "Launching Resampling Tasks in Parallel via singrw..."
 
-# Launch 16K tasks (4 workers total across these)
-if [ -d "$SRC_DEV" ]; then
-    python resample_dataset.py --src "$SRC_DEV" --dst "$DST_DEV_16K" --sr 16000 --workers 3 &
-fi
-if [ -d "$SRC_EVAL" ]; then
-    python resample_dataset.py --src "$SRC_EVAL" --dst "$DST_EVAL_16K" --sr 16000 --workers 3 &
-fi
+./singrw <<EOF
 
-# Launch 32K tasks (4 workers total across these)
-if [ -d "$SRC_DEV" ]; then
-    python resample_dataset.py --src "$SRC_DEV" --dst "$DST_DEV_32K" --sr 32000 --workers 3 &
-fi
-if [ -d "$SRC_EVAL" ]; then
-    python resample_dataset.py --src "$SRC_EVAL" --dst "$DST_EVAL_32K" --sr 32000 --workers 3 &
-fi
+python resample_dataset.py --src "$SRC_DEV" --dst "$DST_DEV_16K" --sr 16000 --workers 3 &
+python resample_dataset.py --src "$SRC_EVAL" --dst "$DST_EVAL_16K" --sr 16000 --workers 3 &
+python resample_dataset.py --src "$SRC_DEV" --dst "$DST_DEV_32K" --sr 32000 --workers 3 &
+python resample_dataset.py --src "$SRC_EVAL" --dst "$DST_EVAL_32K" --sr 32000 --workers 3 &
 
-# Wait for all background processes to finish
 wait
+EOF
 
 echo "All resampling tasks complete."
