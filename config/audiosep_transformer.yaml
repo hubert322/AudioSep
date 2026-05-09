@@ -4,8 +4,8 @@ task_name: AudioSep_Transformer
 data:
     datafiles:
     datafiles:
-        - '/scratch/th3622/machine-listening/2024-lass-dataset/devfsd50k_dev_16k.json'
-        - '/scratch/th3622/machine-listening/2024-lass-dataset/devfsd50k_eval_16k.json'
+        - '/scratch/th3622/machine-listening/2024-lass-dataset/dev/fsd50k_dev_16k.json'
+        - '/scratch/th3622/machine-listening/2024-lass-dataset/dev/fsd50k_eval_16k.json'
         - '/scratch/sc12227/datasets/clotho_v2.1/datafiles/clotho_16k_development.json'
         - '/scratch/sc12227/datasets/clotho_v2.1/datafiles/clotho_16k_evaluation.json'
         - '/scratch/sc12227/datasets/clotho_v2.1/datafiles/clotho_16k_validation.json'
