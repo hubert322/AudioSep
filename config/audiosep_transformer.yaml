@@ -3,14 +3,16 @@ task_name: AudioSep_Transformer
 
 data:
     datafiles:
-        - 'datafiles/template.json'
+        - 'datafiles/fsd50k_dev_16k.json'
 
-    sampling_rate: 32000
+    sampling_rate: 16000
     segment_seconds: 5
     loudness_norm:
         lower_db: -10
         higher_db: 10
     max_mix_num: 2
+    val_csv: '/scratch/th3622/machine-listening/2024-lass-dataset/val/lass_synthetic_validation.csv'
+    val_audio_path: '/scratch/th3622/machine-listening/2024-lass-dataset/val/lass_validation'
 
 model:
     query_net: CLAP
@@ -32,7 +34,7 @@ model:
 train:
     optimizer:
         optimizer_type: AdamW
-        learning_rate: 1e-3
+        learning_rate: 1e-4 # Slightly lower LR is often better for Transformers
         warm_up_steps: 10000
         reduce_lr_steps: 1000000
         lr_lambda_type: constant_warm_up
@@ -41,8 +43,8 @@ train:
     loss_type: l1_wav
     sync_batchnorm: True
     batch_size_per_device: 32
-    steps_per_epoch: 10000
-    evaluate_step_frequency: 2000
-    save_step_frequency: 2000
+    steps_per_epoch: 10000  # Every 10000 steps is called an `epoch`.
+    evaluate_step_frequency: 2000     # Evaluate every #evaluate_step_frequency steps.
+    save_step_frequency: 2000  # Save every #save_step_frequency steps.
     early_stop_steps: 10000001
     random_seed: 1234

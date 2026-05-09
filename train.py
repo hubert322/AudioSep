@@ -121,6 +121,13 @@ def get_data_module(
     # audio-text datasets
     datafiles = configs['data']['datafiles']
     
+    # training dataset
+    dataset = AudioTextDataset(
+        datafiles=datafiles, 
+        sampling_rate=sampling_rate, 
+        max_clip_len=segment_seconds,
+    )
+
     # validation dataset
     val_csv = configs['data'].get('val_csv', None)
     val_audio_path = configs['data'].get('val_audio_path', None)
