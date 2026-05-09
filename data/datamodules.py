@@ -88,7 +88,7 @@ class DataModule(pl.LightningDataModule):
         # return DataLoader(test_split)
         pass
 
-    def teardown(self):
+    def teardown(self, stage: Optional[str] = None):
         # clean up after fit or test
         # called on every process in DDP
         pass
@@ -114,7 +114,7 @@ def collate_fn(list_data_dict):
         }
     """
     
-    at_list_data_dict = [data_dict for data_dict in list_data_dict if data_dict['modality']=='audio_text']
+    at_list_data_dict = [data_dict for data_dict in list_data_dict if data_dict.get('modality') == 'audio_text']
 
     at_data_dict = {}
     
