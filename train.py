@@ -267,6 +267,9 @@ def train(args) -> NoReturn:
         use_text_ratio=use_text_ratio
     )
 
+    if args.freeze_backbone:
+        pl_model.freeze_backbone()
+
     if resume_checkpoint_path is not None:
         logging.info(f'Attempting to load checkpoint [{resume_checkpoint_path}]')
         checkpoint = torch.load(resume_checkpoint_path, map_location='cpu', weights_only=False)
@@ -372,6 +375,12 @@ if __name__ == "__main__":
         type=int,
         default=-1,
         help="Maximum number of steps to train.",
+    )
+
+    parser.add_argument(
+        "--freeze_backbone",
+        action="store_true",
+        help="Freeze the backbone and only train the transformer bottleneck.",
     )
 
     parser.add_argument(

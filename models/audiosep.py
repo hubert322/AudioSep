@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Callable, Dict
 import random
 import lightning.pytorch as pl
@@ -48,6 +49,30 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         
         # Validation Metric
         self.val_sdr = torchmetrics.audio.SignalDistortionRatio()
+
+
+    def freeze_backbone(self):
+        r"""Freeze the backbone (ResUNet and CLAP encoder) and only keep the 
+        transformer bottleneck unfrozen for training.
+        """
+        # 1. Freeze query encoder
+        for param in self.query_encoder.parameters():
+            param.requires_grad = False
+        
+        # 2. Freeze SS model (backbone)
+        for param in self.ss_model.parameters():
+            param.requires_grad = False
+            
+        # 3. Unfreeze transformer bottleneck if it exists
+        if hasattr(self.ss_model, 'base') and hasattr(self.ss_model.base, 'transformer_bottleneck'):
+            for param in self.ss_model.base.transformer_bottleneck.parameters():
+                param.requires_grad = True
+            logging.info("Froze backbone and unfroze transformer bottleneck.")
+        else:
+            raise RuntimeError(
+                "Transformer bottleneck not found in ss_model. "
+                "Cannot train with --freeze_backbone if no transformer is present."
+            )
 
 
     def forward(self, x):
