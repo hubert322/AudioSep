@@ -10,7 +10,7 @@ class DCASEValidationDataset(Dataset):
     Loads pre-mixed mixtures and ground truth targets.
     """
     def __init__(self, csv_path, audio_root, sampling_rate=32000, max_clip_len=5):
-        self.df = pd.read_csv(csv_path)
+        self.df = pd.read_csv(csv_path, skipinitialspace=True)
         self.audio_root = audio_root
         self.sampling_rate = sampling_rate
         self.max_length = max_clip_len * sampling_rate
@@ -77,10 +77,8 @@ class DCASEValidationDataset(Dataset):
         # -----------------------------------
 
         return {
-            'audio_text': {
-                'text': caption,
-                'mixture': mixture,
-                'waveform': source, # The target we want to extract
-                'modality': 'audio_text'
-            }
+            'text': caption,
+            'mixture': mixture,
+            'waveform': source, # The target we want to extract
+            'modality': 'audio_text'
         }
