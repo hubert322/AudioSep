@@ -4,16 +4,9 @@
 #SBATCH --cpus-per-task=12
 #SBATCH --mem=16GB
 #SBATCH --time=04:00:00
-#SBATCH --output=resample_%j.out
 #SBATCH --account=torch_pr_1026_general
+#SBATCH --output=resample_%j.out
 #SBATCH --error=%x-%j.err
-
-# Load ffmpeg (Standard on NYU Greene)
-module load ffmpeg
-
-# Activate your conda environment
-# Replace 'AudioSep' with your actual environment name if different
-source activate AudioSep
 
 # Define Root Directories
 FSD_ROOT="/scratch/th3622/machine-listening/fsdk-download"
@@ -30,7 +23,11 @@ DST_EVAL_32K="$FSD_ROOT/FSD50K.eval_audio_32k"
 
 echo "Launching Resampling Tasks in Parallel via singrw..."
 
+cd /scratch/th3622/lass
+
 ./singrw <<EOF
+cd AudioSep
+export PYTHONUNBUFFERED=1
 
 python resample_dataset.py --src "$SRC_DEV" --dst "$DST_DEV_16K" --sr 16000 --workers 3 &
 python resample_dataset.py --src "$SRC_EVAL" --dst "$DST_EVAL_16K" --sr 16000 --workers 3 &
