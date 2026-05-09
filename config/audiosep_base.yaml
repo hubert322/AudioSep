@@ -10,7 +10,7 @@ data:
         - '/scratch/sc12227/datasets/clotho_v2.1/datafiles/clotho_16k_validation.json'
 
     sampling_rate: 16000
-    segment_seconds: 5
+    segment_seconds: 10
     loudness_norm:
         lower_db: -10
         higher_db: 10
