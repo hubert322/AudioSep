@@ -24,7 +24,8 @@ def get_dirs(
     workspace: str, 
     filename: str, 
     config_yaml: str, 
-    devices_num: int
+    devices_num: int,
+    args: argparse.Namespace
 ) -> List[str]:
     r"""Get directories and paths.
 
@@ -208,9 +209,11 @@ def train(args) -> NoReturn:
         resume_checkpoint_path = None
     
     # Get directories and paths
+    print(f"Initializing workspace at: {workspace}")
     checkpoints_dir, logs_dir, tf_logs_dir, statistics_path = get_dirs(
-        workspace, filename, config_yaml, devices_num,
+        workspace, filename, config_yaml, devices_num, args
     )
+    print(f"Logs will be saved to: {logs_dir}")
 
     logging.info(configs)
 
