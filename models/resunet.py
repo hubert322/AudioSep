@@ -267,11 +267,10 @@ class DecoderBlockRes1B(nn.Module):
 
 class ResUNet30_Base(nn.Module, Base):
     def __init__(self, input_channels, output_channels,
-                 use_transformer_bottleneck=False, transformer_config=None):
+                 use_transformer_bottleneck=False, transformer_config=None,
+                 window_size=2048, hop_size=320):
         super(ResUNet30_Base, self).__init__()
 
-        window_size = 2048
-        hop_size = 320
         center = True
         pad_mode = "reflect"
         window = "hann"
@@ -638,7 +637,8 @@ def get_film_meta(module):
 
 class ResUNet30(nn.Module):
     def __init__(self, input_channels, output_channels, condition_size,
-                 use_transformer_bottleneck=False, transformer_config=None):
+                 use_transformer_bottleneck=False, transformer_config=None,
+                 window_size=2048, hop_size=320):
         super(ResUNet30, self).__init__()
 
         self.use_transformer_bottleneck = use_transformer_bottleneck
@@ -648,6 +648,8 @@ class ResUNet30(nn.Module):
             output_channels=output_channels,
             use_transformer_bottleneck=use_transformer_bottleneck,
             transformer_config=transformer_config,
+            window_size=window_size,
+            hop_size=hop_size,
         )
         
         self.film_meta = get_film_meta(

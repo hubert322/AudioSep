@@ -22,6 +22,8 @@ model:
     output_channels: 1
     resume_checkpoint: ""
     use_text_ratio: 1.0
+    window_size: 1024
+    hop_size: 160
 
 train:
     optimizer:

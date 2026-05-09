@@ -187,6 +187,8 @@ def train(args) -> NoReturn:
     use_text_ratio = configs['model']['use_text_ratio']
     use_transformer_bottleneck = configs['model'].get('use_transformer_bottleneck', False)
     transformer_config = configs['model'].get('transformer_config', None)
+    window_size = configs['model'].get('window_size', 2048)
+    hop_size = configs['model'].get('hop_size', 320)
     
     # Configuration of the trainer
     num_nodes = configs['train']['num_nodes']
@@ -228,6 +230,8 @@ def train(args) -> NoReturn:
         condition_size=condition_size,
         use_transformer_bottleneck=use_transformer_bottleneck,
         transformer_config=transformer_config,
+        window_size=window_size,
+        hop_size=hop_size,
     )
 
     # loss function
@@ -265,7 +269,7 @@ def train(args) -> NoReturn:
 
     if resume_checkpoint_path is not None:
         logging.info(f'Attempting to load checkpoint [{resume_checkpoint_path}]')
-        checkpoint = torch.load(resume_checkpoint_path, map_location='cpu')
+        checkpoint = torch.load(resume_checkpoint_path, map_location='cpu', weights_only=False)
         
         # Load state_dict with strict=False to handle architecture changes (e.g. transformer bottleneck)
         load_result = pl_model.load_state_dict(checkpoint['state_dict'], strict=False)
