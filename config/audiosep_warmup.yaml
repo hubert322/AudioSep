@@ -1,8 +1,7 @@
 ---
-task_name: AudioSep_Transformer
+task_name: AudioSep_Warmup
 
 data:
-    datafiles:
     datafiles:
         - '/scratch/th3622/machine-listening/2024-lass-dataset/devfsd50k_dev_16k.json'
         - '/scratch/th3622/machine-listening/2024-lass-dataset/devfsd50k_eval_16k.json'
