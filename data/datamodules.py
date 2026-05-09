@@ -9,8 +9,9 @@ class DataModule(pl.LightningDataModule):
     def __init__(
         self,
         train_dataset: object,
-        batch_size: int,
-        num_workers: int
+        val_dataset: object = None,
+        batch_size: int = 12,
+        num_workers: int = 4
     ):
         r"""Data module. To get one batch of data:
 
@@ -30,6 +31,7 @@ class DataModule(pl.LightningDataModule):
         """
         super().__init__()
         self._train_dataset = train_dataset
+        self._val_dataset = val_dataset
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.collate_fn = collate_fn
@@ -46,10 +48,8 @@ class DataModule(pl.LightningDataModule):
         # make assignments here (val/train/test split)
         # called on every process in DDP
 
-        # SegmentSampler is used for selecting segments for training.
-        # On multiple devices, each SegmentSampler samples a part of mini-batch
-        # data.
         self.train_dataset = self._train_dataset
+        self.val_dataset = self._val_dataset
         
         
     def train_dataloader(self) -> torch.utils.data.DataLoader:
@@ -66,10 +66,22 @@ class DataModule(pl.LightningDataModule):
 
         return train_loader
 
-    def val_dataloader(self):
-        # val_split = Dataset(...)
-        # return DataLoader(val_split)
-        pass
+    def val_dataloader(self) -> torch.utils.data.DataLoader:
+        r"""Get val loader."""
+        if self.val_dataset is None:
+            return None
+            
+        val_loader = DataLoader(
+            dataset=self.val_dataset,
+            batch_size=self.batch_size,
+            collate_fn=self.collate_fn,
+            num_workers=self.num_workers,
+            pin_memory=True,
+            persistent_workers=False,
+            shuffle=False
+        )
+
+        return val_loader
 
     def test_dataloader(self):
         # test_split = Dataset(...)
@@ -109,7 +121,7 @@ def collate_fn(list_data_dict):
     if len(at_list_data_dict) > 0:
         for key in at_list_data_dict[0].keys():
             at_data_dict[key] = [at_data_dict[key] for at_data_dict in at_list_data_dict]
-            if key == 'waveform':
+            if key == 'waveform' or key == 'mixture':
                 at_data_dict[key] = torch.stack(at_data_dict[key])
             elif key == 'text':
                 at_data_dict[key] = [text for text in at_data_dict[key]]

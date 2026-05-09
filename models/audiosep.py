@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import LambdaLR
+import torchmetrics
 
 from models.clap_encoder import CLAP_Encoder
 
@@ -44,6 +45,9 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         self.optimizer_type = optimizer_type
         self.learning_rate = learning_rate
         self.lr_lambda_func = lr_lambda_func
+        
+        # Validation Metric
+        self.val_sdr = torchmetrics.audio.SignalDistortionRatio()
 
 
     def forward(self, x):
@@ -111,6 +115,49 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         self.log_dict({"train_loss": loss})
         
         return loss
+
+    def validation_step(self, batch_data_dict, batch_idx):
+        r"""Forward a mini-batch validation data to model and calculate SDR.
+        """
+        batch_audio_text_dict = batch_data_dict['audio_text']
+
+        batch_text = batch_audio_text_dict['text']
+        batch_audio = batch_audio_text_dict['waveform'] # Ground truth
+        
+        # For validation, we use the pre-mixed 'mixture' if available, 
+        # otherwise we fallback to the waveform_mixer (though val set should be pre-mixed)
+        if 'mixture' in batch_audio_text_dict:
+            mixtures = batch_audio_text_dict['mixture']
+            segments = batch_audio # Ground truth is already in segments
+        else:
+            mixtures, segments = self.waveform_mixer(waveforms=batch_audio)
+
+        device = mixtures.device
+        
+        # calculate text embed for audio-text data
+        if self.query_encoder_type == 'CLAP':
+            conditions = self.query_encoder.get_query_embed(
+                modality='text',
+                text=batch_text,
+            )
+
+        input_dict = {
+            'mixture': mixtures[:, None, :].squeeze(1),
+            'condition': conditions,
+        }
+
+        self.ss_model.eval()
+        with torch.no_grad():
+            sep_segment = self.ss_model(input_dict)['waveform']
+            sep_segment = sep_segment.squeeze()
+
+        # Calculate SDR
+        # target: (batch_size, segment_samples), preds: (batch_size, segment_samples)
+        sdr_val = self.val_sdr(sep_segment, segments.squeeze())
+
+        self.log("val_sdr", sdr_val, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        
+        return sdr_val
 
     def test_step(self, batch, batch_idx):
         pass

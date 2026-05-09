@@ -9,6 +9,7 @@ from lightning.pytorch.strategies import DDPStrategy
 from torch.utils.tensorboard import SummaryWriter
 from data.datamodules import *
 from utils import create_logging, parse_yaml
+from data.dcase_dataset import DCASEValidationDataset
 from models.resunet import *
 from losses import get_loss_function
 from models.audiosep import AudioSep, get_model_class
@@ -120,17 +121,23 @@ def get_data_module(
     # audio-text datasets
     datafiles = configs['data']['datafiles']
     
-    # dataset
-    dataset = AudioTextDataset(
-        datafiles=datafiles, 
-        sampling_rate=sampling_rate, 
-        max_clip_len=segment_seconds,
-    )
-    
+    # validation dataset
+    val_csv = configs['data'].get('val_csv', None)
+    val_audio_path = configs['data'].get('val_audio_path', None)
+    if val_csv and val_audio_path:
+        val_dataset = DCASEValidationDataset(
+            csv_path=val_csv,
+            audio_root=val_audio_path,
+            sampling_rate=sampling_rate,
+            max_clip_len=segment_seconds,
+        )
+    else:
+        val_dataset = None
     
     # data module
     data_module = DataModule(
         train_dataset=dataset,
+        val_dataset=val_dataset,
         num_workers=num_workers,
         batch_size=batch_size
     )
@@ -185,6 +192,7 @@ def train(args) -> NoReturn:
     lr_lambda_type = configs['train']["optimizer"]['lr_lambda_type']
     warm_up_steps = configs['train']["optimizer"]['warm_up_steps']
     reduce_lr_steps = configs['train']["optimizer"]['reduce_lr_steps']
+    evaluate_step_frequency = configs['train']['evaluate_step_frequency']
     save_step_frequency = configs['train']['save_step_frequency']
     resume_checkpoint_path = args.resume_checkpoint_path
     if resume_checkpoint_path == "":
@@ -302,6 +310,7 @@ def train(args) -> NoReturn:
         max_epochs=-1,
         max_steps=args.num_steps,
         log_every_n_steps=50,
+        val_check_interval=evaluate_step_frequency,
         use_distributed_sampler=True,
         sync_batchnorm=sync_batchnorm,
         num_sanity_val_steps=2,
