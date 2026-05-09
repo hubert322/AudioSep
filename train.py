@@ -4,6 +4,7 @@ import os
 import pathlib
 from typing import List, NoReturn
 import lightning.pytorch as pl
+import torch
 from lightning.pytorch.strategies import DDPStrategy
 from torch.utils.tensorboard import SummaryWriter
 from data.datamodules import *
@@ -186,8 +187,24 @@ def train(args) -> NoReturn:
     resume_checkpoint_path = args.resume_checkpoint_path
     if resume_checkpoint_path == "":
         resume_checkpoint_path = None
-    else:
-        logging.info(f'Finetuning AudioSep with checkpoint [{resume_checkpoint_path}]')
+    
+    if resume_checkpoint_path is not None:
+        logging.info(f'Attempting to load checkpoint [{resume_checkpoint_path}]')
+        checkpoint = torch.load(resume_checkpoint_path, map_location='cpu')
+        
+        # Load state_dict with strict=False to handle architecture changes (e.g. transformer bottleneck)
+        load_result = pl_model.load_state_dict(checkpoint['state_dict'], strict=False)
+        
+        if len(load_result.missing_keys) > 0:
+            logging.warning(f'Missing keys when loading checkpoint: {load_result.missing_keys}')
+        if len(load_result.unexpected_keys) > 0:
+            logging.warning(f'Unexpected keys when loading checkpoint: {load_result.unexpected_keys}')
+            
+        logging.info(f'Successfully loaded checkpoint [{resume_checkpoint_path}] with strict=False')
+        
+        # We set resume_checkpoint_path to None so that trainer.fit starts from step 0
+        # and doesn't try to restore optimizer/scheduler states which may be incompatible.
+        resume_checkpoint_path = None
 
     # Get directories and paths
     checkpoints_dir, logs_dir, tf_logs_dir, statistics_path = get_dirs(
