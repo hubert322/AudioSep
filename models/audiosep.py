@@ -153,7 +153,15 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
 
         # Calculate SDR
         # target: (batch_size, segment_samples), preds: (batch_size, segment_samples)
-        sdr_val = self.val_sdr(sep_segment, segments.squeeze())
+        # Move to CPU to avoid CUFFT_INTERNAL_ERROR which sometimes occurs on GPU
+        device = sep_segment.device
+        sep_segment_cpu = sep_segment.detach().cpu()
+        segments_cpu = segments.squeeze().detach().cpu()
+
+        # Move metric to CPU, calculate, and move back
+        self.val_sdr.to('cpu')
+        sdr_val = self.val_sdr(sep_segment_cpu, segments_cpu)
+        self.val_sdr.to(device)
 
         self.log("val_sdr", sdr_val, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
         
