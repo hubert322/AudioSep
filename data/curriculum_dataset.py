@@ -95,7 +95,51 @@ class CurriculumAudioTextDataset(IterableDataset):
         )
         self.default_min_similarity = self.curriculum.get("min_similarity", None)
         self.default_max_similarity = float(self.curriculum.get("max_similarity", 0.01))
+        self.default_pair_bands = self._parse_pair_bands(
+            self.curriculum.get("pair_bands", None),
+            fallback_min_similarity=self.default_min_similarity,
+            fallback_max_similarity=self.default_max_similarity,
+        )
         self.stages = self._parse_stages(self.curriculum.get("stages", []))
+
+    def _parse_pair_bands(
+        self,
+        pair_bands: list[dict[str, Any]] | None,
+        fallback_min_similarity: float | None,
+        fallback_max_similarity: float,
+    ) -> list[dict[str, Any]]:
+        if not pair_bands:
+            return [
+                {
+                    "name": "default",
+                    "weight": 1.0,
+                    "min_similarity": fallback_min_similarity,
+                    "max_similarity": float(fallback_max_similarity),
+                }
+            ]
+
+        parsed = []
+        for idx, band in enumerate(pair_bands):
+            weight = float(band.get("weight", 1.0))
+            if weight <= 0:
+                continue
+            parsed.append(
+                {
+                    "name": band.get("name", f"band_{idx + 1}"),
+                    "weight": weight,
+                    "min_similarity": band.get(
+                        "min_similarity",
+                        fallback_min_similarity,
+                    ),
+                    "max_similarity": float(
+                        band.get("max_similarity", fallback_max_similarity)
+                    ),
+                }
+            )
+
+        if not parsed:
+            raise ValueError("At least one curriculum pair band must have positive weight.")
+        return parsed
 
     def _parse_stages(self, stages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         parsed = []
@@ -107,13 +151,18 @@ class CurriculumAudioTextDataset(IterableDataset):
             else:
                 cumulative_steps += int(steps)
                 end_step = cumulative_steps
+            stage_min_similarity = stage.get("min_similarity", self.default_min_similarity)
+            stage_max_similarity = float(stage.get("max_similarity", self.default_max_similarity))
             parsed.append(
                 {
                     "name": stage.get("name", f"stage_{idx + 1}"),
                     "end_step": end_step,
-                    "min_similarity": stage.get("min_similarity", self.default_min_similarity),
-                    "max_similarity": float(
-                        stage.get("max_similarity", self.default_max_similarity)
+                    "min_similarity": stage_min_similarity,
+                    "max_similarity": stage_max_similarity,
+                    "pair_bands": self._parse_pair_bands(
+                        stage.get("pair_bands", None),
+                        fallback_min_similarity=stage_min_similarity,
+                        fallback_max_similarity=stage_max_similarity,
                     ),
                     "negative_ratio": float(
                         stage.get("negative_ratio", self.default_negative_ratio)
@@ -138,6 +187,7 @@ class CurriculumAudioTextDataset(IterableDataset):
                 "name": "static",
                 "min_similarity": self.default_min_similarity,
                 "max_similarity": self.default_max_similarity,
+                "pair_bands": self.default_pair_bands,
                 "negative_ratio": self.default_negative_ratio,
                 "negative_max_similarity": self.default_negative_max_similarity,
             }
@@ -149,6 +199,21 @@ class CurriculumAudioTextDataset(IterableDataset):
         ]
         idx = min(bisect_right(finite_ends, local_step), len(self.stages) - 1)
         return self.stages[idx]
+
+    def _choose_pair_band(
+        self,
+        rng: random.Random,
+        stage: dict[str, Any],
+    ) -> dict[str, Any]:
+        pair_bands = stage.get("pair_bands") or self.default_pair_bands
+        total_weight = sum(float(band["weight"]) for band in pair_bands)
+        threshold = rng.random() * total_weight
+        cumulative = 0.0
+        for band in pair_bands:
+            cumulative += float(band["weight"])
+            if threshold <= cumulative:
+                return band
+        return pair_bands[-1]
 
     def _same_or_bad_pair(self, left_idx: int, right_idx: int, max_similarity: float) -> bool:
         if left_idx == right_idx:
@@ -190,7 +255,6 @@ class CurriculumAudioTextDataset(IterableDataset):
         max_similarity: float,
     ) -> tuple[int, int]:
         n = len(self.sources)
-        fallback: tuple[int, int] | None = None
 
         for _ in range(self.max_sampling_attempts):
             left_idx = rng.randrange(n)
@@ -199,17 +263,12 @@ class CurriculumAudioTextDataset(IterableDataset):
                 right_idx += 1
             if self._same_or_bad_pair(left_idx, right_idx, max_similarity):
                 continue
-            if fallback is None:
-                fallback = (left_idx, right_idx)
             if self._similarity_in_range(left_idx, right_idx, min_similarity, max_similarity):
                 return left_idx, right_idx
 
-        if fallback is not None:
-            return fallback
-
         raise RuntimeError(
             "Could not sample a valid source pair. Consider raising max_similarity "
-            "or max_sampling_attempts."
+            "or max_sampling_attempts, or relaxing the selected pair band."
         )
 
     def _sample_negative_query(
@@ -285,8 +344,9 @@ class CurriculumAudioTextDataset(IterableDataset):
         return rng.choice(captions)
 
     def _make_example(self, rng: random.Random, stage: dict[str, Any]) -> dict[str, Any]:
-        min_similarity = stage.get("min_similarity", None)
-        max_similarity = float(stage["max_similarity"])
+        pair_band = self._choose_pair_band(rng, stage)
+        min_similarity = pair_band.get("min_similarity", None)
+        max_similarity = float(pair_band["max_similarity"])
         negative_ratio = float(stage.get("negative_ratio", 0.0))
         negative_max_similarity = float(
             stage.get("negative_max_similarity", self.default_negative_max_similarity)
@@ -299,6 +359,9 @@ class CurriculumAudioTextDataset(IterableDataset):
                     rng=rng,
                     min_similarity=min_similarity,
                     max_similarity=max_similarity,
+                )
+                pair_similarity = float(
+                    np.dot(self.embeddings[target_idx], self.embeddings[noise_idx])
                 )
                 is_negative = rng.random() < negative_ratio
                 query_idx = target_idx
@@ -334,6 +397,11 @@ class CurriculumAudioTextDataset(IterableDataset):
                     "mixture": mixture,
                     "is_negative": float(is_negative),
                     "stage": stage["name"],
+                    "pair_band": pair_band["name"],
+                    "pair_similarity": pair_similarity,
+                    "is_easy_pair": float(pair_band["name"] == "easy"),
+                    "is_medium_pair": float(pair_band["name"] == "medium"),
+                    "is_hard_pair": float(pair_band["name"] == "hard"),
                     "target_source_id": self.sources[target_idx]["source_id"],
                     "noise_source_id": self.sources[noise_idx]["source_id"],
                     "query_source_id": self.sources[query_idx]["source_id"],

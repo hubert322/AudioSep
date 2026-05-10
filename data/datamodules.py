@@ -128,7 +128,13 @@ def collate_fn(list_data_dict):
                 at_data_dict[key] = [text for text in at_data_dict[key]]
             elif isinstance(at_data_dict[key][0], torch.Tensor):
                 at_data_dict[key] = torch.stack(at_data_dict[key])
-            elif key == 'is_negative':
+            elif key in {
+                'is_negative',
+                'pair_similarity',
+                'is_easy_pair',
+                'is_medium_pair',
+                'is_hard_pair',
+            }:
                 at_data_dict[key] = torch.tensor(at_data_dict[key], dtype=torch.float32)
 
     

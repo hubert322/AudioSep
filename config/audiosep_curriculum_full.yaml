@@ -26,22 +26,70 @@ data:
             - name: full_easy
               steps: 20000
               min_similarity: null
-              max_similarity: 0.06
+              max_similarity: 0.125
               negative_ratio: 0.05
+              pair_bands:
+                  - name: easy
+                    weight: 0.85
+                    min_similarity: null
+                    max_similarity: 0.06
+                  - name: medium
+                    weight: 0.15
+                    min_similarity: 0.06
+                    max_similarity: 0.125
             - name: full_medium
               steps: 20000
-              min_similarity: 0.03
-              max_similarity: 0.125
+              min_similarity: null
+              max_similarity: 0.29
               negative_ratio: 0.08
+              pair_bands:
+                  - name: easy
+                    weight: 0.60
+                    min_similarity: null
+                    max_similarity: 0.06
+                  - name: medium
+                    weight: 0.30
+                    min_similarity: 0.06
+                    max_similarity: 0.19
+                  - name: hard
+                    weight: 0.10
+                    min_similarity: 0.19
+                    max_similarity: 0.29
             - name: full_hard
               steps: 30000
-              min_similarity: 0.08
-              max_similarity: 0.19
-              negative_ratio: 0.10
-            - name: full_hard_upper
-              min_similarity: 0.12
+              min_similarity: null
               max_similarity: 0.29
               negative_ratio: 0.10
+              pair_bands:
+                  - name: easy
+                    weight: 0.45
+                    min_similarity: null
+                    max_similarity: 0.06
+                  - name: medium
+                    weight: 0.35
+                    min_similarity: 0.06
+                    max_similarity: 0.19
+                  - name: hard
+                    weight: 0.20
+                    min_similarity: 0.19
+                    max_similarity: 0.29
+            - name: full_hard_upper
+              min_similarity: null
+              max_similarity: 0.29
+              negative_ratio: 0.10
+              pair_bands:
+                  - name: easy
+                    weight: 0.35
+                    min_similarity: null
+                    max_similarity: 0.06
+                  - name: medium
+                    weight: 0.40
+                    min_similarity: 0.06
+                    max_similarity: 0.19
+                  - name: hard
+                    weight: 0.25
+                    min_similarity: 0.19
+                    max_similarity: 0.29
 
 model:
     query_net: CLAP

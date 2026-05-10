@@ -162,6 +162,14 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         log_dict = {"train_loss": loss}
         if 'is_negative' in batch_audio_text_dict:
             log_dict["train_negative_ratio"] = batch_audio_text_dict['is_negative'].float().mean()
+        if 'pair_similarity' in batch_audio_text_dict:
+            log_dict["train_pair_similarity"] = batch_audio_text_dict['pair_similarity'].float().mean()
+        if 'is_hard_pair' in batch_audio_text_dict:
+            log_dict["train_hard_pair_ratio"] = batch_audio_text_dict['is_hard_pair'].float().mean()
+        if 'is_easy_pair' in batch_audio_text_dict:
+            log_dict["train_easy_pair_ratio"] = batch_audio_text_dict['is_easy_pair'].float().mean()
+        if 'is_medium_pair' in batch_audio_text_dict:
+            log_dict["train_medium_pair_ratio"] = batch_audio_text_dict['is_medium_pair'].float().mean()
         self.log_dict(log_dict)
         
         return loss
