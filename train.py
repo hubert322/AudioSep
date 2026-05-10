@@ -174,6 +174,11 @@ def get_data_module(
     return data_module
 
 
+def has_validation_data(config_yaml: str) -> bool:
+    configs = parse_yaml(config_yaml)
+    return bool(configs['data'].get('val_csv') and configs['data'].get('val_audio_path'))
+
+
 def get_checkpoint_global_step(checkpoint_path: str) -> int:
     if not checkpoint_path:
         return 0
@@ -249,6 +254,7 @@ def train(args) -> NoReturn:
     print(f"Logs will be saved to: {logs_dir}")
 
     logging.info(configs)
+    use_validation = has_validation_data(config_yaml)
 
     # data module
     data_module = get_data_module(
@@ -367,10 +373,11 @@ def train(args) -> NoReturn:
         max_epochs=-1,
         max_steps=args.num_steps,
         log_every_n_steps=50,
-        val_check_interval=evaluate_step_frequency,
+        val_check_interval=evaluate_step_frequency if use_validation else None,
+        limit_val_batches=1.0 if use_validation else 0,
         use_distributed_sampler=use_distributed_sampler,
         sync_batchnorm=sync_batchnorm,
-        num_sanity_val_steps=2,
+        num_sanity_val_steps=2 if use_validation else 0,
         enable_checkpointing=False,
         enable_progress_bar=True,
         enable_model_summary=True,

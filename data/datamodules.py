@@ -72,7 +72,7 @@ class DataModule(pl.LightningDataModule):
     def val_dataloader(self) -> torch.utils.data.DataLoader:
         r"""Get val loader."""
         if self.val_dataset is None:
-            return None
+            return []
             
         val_loader = DataLoader(
             dataset=self.val_dataset,

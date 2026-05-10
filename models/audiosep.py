@@ -122,7 +122,7 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
             )
 
         input_dict = {
-            'mixture': mixtures.squeeze(1) if mixtures.ndim == 3 else mixtures,
+            'mixture': mixtures[:, None, :] if mixtures.ndim == 2 else mixtures,
             'condition': conditions,
         }
 
@@ -192,7 +192,7 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
             )
 
         input_dict = {
-            'mixture': mixtures[:, None, :].squeeze(1),
+            'mixture': mixtures[:, None, :] if mixtures.ndim == 2 else mixtures,
             'condition': conditions,
         }
 
