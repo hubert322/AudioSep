@@ -1,0 +1,63 @@
+---
+task_name: AudioSep_Curriculum_Warmup
+
+data:
+    curriculum_manifest: 'datafiles/curriculum/sources.json'
+    source_embeddings: 'datafiles/curriculum/source_embeddings.npy'
+
+    sampling_rate: 16000
+    segment_seconds: 10
+    loudness_norm:
+        lower_db: -10
+        higher_db: 10
+    max_mix_num: 2
+    curriculum:
+        seed: 1234
+        epoch_steps: 10000
+        max_sampling_attempts: 500
+        audio_load_attempts: 20
+        max_similarity: 0.01
+        negative_ratio: 0.0
+        stages:
+            - name: transformer_easy
+              max_similarity: 0.01
+              negative_ratio: 0.0
+
+model:
+    query_net: CLAP
+    condition_size: 512
+    model_type: ResUNet30
+    input_channels: 1
+    output_channels: 1
+    resume_checkpoint: ""
+    use_text_ratio: 1.0
+    window_size: 1024
+    hop_size: 160
+    use_transformer_bottleneck: true
+    transformer_config:
+        text_embed_dim: 512
+        d_model: 384
+        nhead: 8
+        num_layers: 4
+        dim_feedforward: 1536
+        dropout: 0.1
+
+train:
+    optimizer:
+        optimizer_type: AdamW
+        learning_rate: 1e-4
+        warm_up_steps: 1000
+        reduce_lr_steps: 20000
+        lr_lambda_type: linear_warm_up
+    num_nodes: 1
+    num_workers: 2
+    loss_type: l1_wav
+    negative_loss_weight: 1.0
+    sync_batchnorm: False
+    use_distributed_sampler: False
+    batch_size_per_device: 8
+    steps_per_epoch: 10000
+    evaluate_step_frequency: 2000
+    save_step_frequency: 2000
+    early_stop_steps: 10000001
+    random_seed: 1234

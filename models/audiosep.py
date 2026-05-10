@@ -25,6 +25,7 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         learning_rate: float = None,
         lr_lambda_func = None,
         use_text_ratio: float =1.0,
+        negative_loss_weight: float = 1.0,
     ):
         r"""Pytorch Lightning wrapper of PyTorch model, including forward,
         optimization of model, etc.
@@ -47,6 +48,7 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         self.optimizer_type = optimizer_type
         self.learning_rate = learning_rate
         self.lr_lambda_func = lr_lambda_func
+        self.negative_loss_weight = negative_loss_weight
 
 
     def freeze_backbone(self):
@@ -100,22 +102,27 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         batch_text = batch_audio_text_dict['text']
         batch_audio = batch_audio_text_dict['waveform']
         device = batch_audio.device
-        
-        mixtures, segments = self.waveform_mixer(
-            waveforms=batch_audio
-        )
+
+        pre_mixed = 'mixture' in batch_audio_text_dict and 'segment' in batch_audio_text_dict
+        if pre_mixed:
+            mixtures = batch_audio_text_dict['mixture']
+            segments = batch_audio_text_dict['segment']
+        else:
+            mixtures, segments = self.waveform_mixer(
+                waveforms=batch_audio
+            )
 
         # calculate text embed for audio-text data
         if self.query_encoder_type == 'CLAP':
             conditions = self.query_encoder.get_query_embed(
-                modality='hybird',
+                modality='text' if pre_mixed else 'hybird',
                 text=batch_text,
                 audio=segments.squeeze(1),
                 use_text_ratio=self.use_text_ratio,
             )
 
         input_dict = {
-            'mixture': mixtures[:, None, :].squeeze(1),
+            'mixture': mixtures.squeeze(1) if mixtures.ndim == 3 else mixtures,
             'condition': conditions,
         }
 
@@ -125,7 +132,8 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
 
         self.ss_model.train()
         sep_segment = self.ss_model(input_dict)['waveform']
-        sep_segment = sep_segment.squeeze()
+        if sep_segment.ndim == 3 and sep_segment.size(1) == 1:
+            sep_segment = sep_segment.squeeze(1)
         # (batch_size, 1, segment_samples)
 
         output_dict = {
@@ -133,9 +141,28 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         }
 
         # Calculate loss.
-        loss = self.loss_function(output_dict, target_dict)
+        if (
+            pre_mixed
+            and 'is_negative' in batch_audio_text_dict
+            and self.negative_loss_weight != 1.0
+        ):
+            per_sample_loss = torch.mean(
+                torch.abs(output_dict['segment'] - target_dict['segment']),
+                dim=tuple(range(1, output_dict['segment'].ndim)),
+            )
+            weights = torch.where(
+                batch_audio_text_dict['is_negative'].bool(),
+                torch.full_like(per_sample_loss, float(self.negative_loss_weight)),
+                torch.ones_like(per_sample_loss),
+            )
+            loss = torch.mean(per_sample_loss * weights)
+        else:
+            loss = self.loss_function(output_dict, target_dict)
 
-        self.log_dict({"train_loss": loss})
+        log_dict = {"train_loss": loss}
+        if 'is_negative' in batch_audio_text_dict:
+            log_dict["train_negative_ratio"] = batch_audio_text_dict['is_negative'].float().mean()
+        self.log_dict(log_dict)
         
         return loss
 

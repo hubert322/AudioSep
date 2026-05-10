@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, NoReturn
 import torch
 import lightning.pytorch as pl
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, IterableDataset
 from data.audiotext_dataset import AudioTextDataset
 
 
@@ -11,7 +11,8 @@ class DataModule(pl.LightningDataModule):
         train_dataset: object,
         val_dataset: object = None,
         batch_size: int = 12,
-        num_workers: int = 4
+        num_workers: int = 4,
+        shuffle: bool = True,
     ):
         r"""Data module. To get one batch of data:
 
@@ -34,6 +35,7 @@ class DataModule(pl.LightningDataModule):
         self._val_dataset = val_dataset
         self.num_workers = num_workers
         self.batch_size = batch_size
+        self.shuffle = shuffle
         self.collate_fn = collate_fn
 
 
@@ -54,6 +56,7 @@ class DataModule(pl.LightningDataModule):
         
     def train_dataloader(self) -> torch.utils.data.DataLoader:
         r"""Get train loader."""
+        is_iterable = isinstance(self.train_dataset, IterableDataset)
         train_loader = DataLoader(
             dataset=self.train_dataset,
             batch_size=self.batch_size,
@@ -61,7 +64,7 @@ class DataModule(pl.LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=True,
             persistent_workers=False,
-            shuffle=True
+            shuffle=False if is_iterable else self.shuffle
         )
 
         return train_loader
@@ -121,10 +124,12 @@ def collate_fn(list_data_dict):
     if len(at_list_data_dict) > 0:
         for key in at_list_data_dict[0].keys():
             at_data_dict[key] = [at_data_dict[key] for at_data_dict in at_list_data_dict]
-            if key == 'waveform' or key == 'mixture':
-                at_data_dict[key] = torch.stack(at_data_dict[key])
-            elif key == 'text':
+            if key == 'text':
                 at_data_dict[key] = [text for text in at_data_dict[key]]
+            elif isinstance(at_data_dict[key][0], torch.Tensor):
+                at_data_dict[key] = torch.stack(at_data_dict[key])
+            elif key == 'is_negative':
+                at_data_dict[key] = torch.tensor(at_data_dict[key], dtype=torch.float32)
 
     
     data_dict = {

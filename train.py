@@ -8,6 +8,7 @@ import torch
 from lightning.pytorch.strategies import DDPStrategy
 from torch.utils.tensorboard import SummaryWriter
 from data.datamodules import *
+from data.curriculum_dataset import CurriculumAudioTextDataset
 from utils import create_logging, parse_yaml
 from data.dcase_dataset import DCASEValidationDataset
 from models.resunet import *
@@ -92,6 +93,7 @@ def get_data_module(
     config_yaml: str,
     num_workers: int,
     batch_size: int,
+    initial_global_step: int = 0,
 ) -> DataModule:
     r"""Create data_module. Mini-batch data can be obtained by:
 
@@ -118,16 +120,34 @@ def get_data_module(
     configs = parse_yaml(config_yaml)
     sampling_rate = configs['data']['sampling_rate']
     segment_seconds = configs['data']['segment_seconds']
-    
-    # audio-text datasets
-    datafiles = configs['data']['datafiles']
-    
-    # training dataset
-    dataset = AudioTextDataset(
-        datafiles=datafiles, 
-        sampling_rate=sampling_rate, 
-        max_clip_len=segment_seconds,
-    )
+    lower_db = configs['data'].get('loudness_norm', {}).get('lower_db', -10)
+    higher_db = configs['data'].get('loudness_norm', {}).get('higher_db', 10)
+
+    if configs['data'].get('curriculum_manifest'):
+        curriculum_config = dict(configs['data'].get('curriculum', {}))
+        curriculum_config['initial_global_step'] = initial_global_step
+        dataset = CurriculumAudioTextDataset(
+            manifest_path=configs['data']['curriculum_manifest'],
+            source_embeddings_path=configs['data']['source_embeddings'],
+            sampling_rate=sampling_rate,
+            max_clip_len=segment_seconds,
+            lower_db=lower_db,
+            higher_db=higher_db,
+            curriculum=curriculum_config,
+            batch_size_per_device=batch_size,
+        )
+        shuffle = False
+    else:
+        # audio-text datasets
+        datafiles = configs['data']['datafiles']
+
+        # training dataset
+        dataset = AudioTextDataset(
+            datafiles=datafiles, 
+            sampling_rate=sampling_rate, 
+            max_clip_len=segment_seconds,
+        )
+        shuffle = True
 
     # validation dataset
     val_csv = configs['data'].get('val_csv', None)
@@ -147,10 +167,20 @@ def get_data_module(
         train_dataset=dataset,
         val_dataset=val_dataset,
         num_workers=num_workers,
-        batch_size=batch_size
+        batch_size=batch_size,
+        shuffle=shuffle,
     )
 
     return data_module
+
+
+def get_checkpoint_global_step(checkpoint_path: str) -> int:
+    if not checkpoint_path:
+        return 0
+    if not os.path.exists(checkpoint_path):
+        return 0
+    checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
+    return int(checkpoint.get('global_step', 0))
 
 
 def train(args) -> NoReturn:
@@ -190,6 +220,7 @@ def train(args) -> NoReturn:
     transformer_config = configs['model'].get('transformer_config', None)
     window_size = configs['model'].get('window_size', 2048)
     hop_size = configs['model'].get('hop_size', 320)
+    negative_loss_weight = configs['train'].get('negative_loss_weight', 1.0)
     
     # Configuration of the trainer
     num_nodes = configs['train']['num_nodes']
@@ -204,9 +235,11 @@ def train(args) -> NoReturn:
     reduce_lr_steps = configs['train']["optimizer"]['reduce_lr_steps']
     evaluate_step_frequency = configs['train']['evaluate_step_frequency']
     save_step_frequency = configs['train']['save_step_frequency']
+    use_distributed_sampler = configs['train'].get('use_distributed_sampler', True)
     resume_checkpoint_path = args.resume_checkpoint_path
     if resume_checkpoint_path == "":
         resume_checkpoint_path = None
+    initial_global_step = get_checkpoint_global_step(resume_checkpoint_path) if args.resume else 0
     
     # Get directories and paths
     print(f"Initializing workspace at: {workspace}")
@@ -222,6 +255,7 @@ def train(args) -> NoReturn:
         config_yaml=config_yaml,
         batch_size=batch_size,
         num_workers=num_workers,
+        initial_global_step=initial_global_step,
     )
     
     # model
@@ -267,7 +301,8 @@ def train(args) -> NoReturn:
         optimizer_type=optimizer_type,
         learning_rate=learning_rate,
         lr_lambda_func=lr_lambda_func,
-        use_text_ratio=use_text_ratio
+        use_text_ratio=use_text_ratio,
+        negative_loss_weight=negative_loss_weight,
     )
 
     if args.freeze_backbone:
@@ -333,7 +368,7 @@ def train(args) -> NoReturn:
         max_steps=args.num_steps,
         log_every_n_steps=50,
         val_check_interval=evaluate_step_frequency,
-        use_distributed_sampler=True,
+        use_distributed_sampler=use_distributed_sampler,
         sync_batchnorm=sync_batchnorm,
         num_sanity_val_steps=2,
         enable_checkpointing=False,
@@ -367,7 +402,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--resume_checkpoint_path",
         type=str,
-        required=True,
         default='',
         help="Path of pretrained checkpoint for finetuning.",
     )
