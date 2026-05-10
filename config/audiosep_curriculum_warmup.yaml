@@ -18,11 +18,11 @@ data:
         epoch_steps: 10000
         max_sampling_attempts: 500
         audio_load_attempts: 20
-        max_similarity: 0.01
+        max_similarity: 0.06
         negative_ratio: 0.0
         stages:
             - name: transformer_easy
-              max_similarity: 0.01
+              max_similarity: 0.06
               negative_ratio: 0.0
 
 model:
@@ -52,12 +52,12 @@ train:
         reduce_lr_steps: 20000
         lr_lambda_type: linear_warm_up
     num_nodes: 1
-    num_workers: 2
+    num_workers: 6
     loss_type: l1_wav
     negative_loss_weight: 1.0
-    sync_batchnorm: False
+    sync_batchnorm: True
     use_distributed_sampler: False
-    batch_size_per_device: 8
+    batch_size_per_device: 32
     steps_per_epoch: 10000
     evaluate_step_frequency: 2000
     save_step_frequency: 2000
