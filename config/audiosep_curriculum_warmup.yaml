@@ -11,8 +11,8 @@ data:
         lower_db: -10
         higher_db: 10
     max_mix_num: 2
-    val_csv: '/path/to/lass_synthetic_validation.csv'
-    val_audio_path: '/path/to/lass_validation'
+    val_csv: '/scratch/th3622/machine-listening/2024-lass-dataset/val/lass_synthetic_validation.csv'
+    val_audio_path: '/scratch/th3622/machine-listening/2024-lass-dataset/val/lass_validation'
     curriculum:
         seed: 1234
         epoch_steps: 10000
