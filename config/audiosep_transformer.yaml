@@ -3,7 +3,6 @@ task_name: AudioSep_Transformer
 
 data:
     datafiles:
-    datafiles:
         - '/scratch/th3622/machine-listening/2024-lass-dataset/dev/fsd50k_dev_16k.json'
         - '/scratch/th3622/machine-listening/2024-lass-dataset/dev/fsd50k_eval_16k.json'
         - '/scratch/sc12227/datasets/clotho_v2.1/datafiles/clotho_16k_development.json'
@@ -41,9 +40,9 @@ model:
 train:
     optimizer:
         optimizer_type: AdamW
-        learning_rate: 1e-4 # Slightly lower LR is often better for Transformers
-        warm_up_steps: 1000
-        reduce_lr_steps: 20000
+        learning_rate: 5e-5 # Lowered for full-model fine-tuning
+        warm_up_steps: 2000
+        reduce_lr_steps: 100000 # Extended to cover the full training duration
         lr_lambda_type: linear_warm_up
     num_nodes: 1
     num_workers: 6

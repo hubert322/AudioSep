@@ -9,6 +9,7 @@ from torch.optim.lr_scheduler import LambdaLR
 import torchmetrics
 
 from models.clap_encoder import CLAP_Encoder
+from models.metrics import calculate_sdr_torch, calculate_sisdr_torch
 
 from huggingface_hub import PyTorchModelHubMixin
 
@@ -46,9 +47,6 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         self.optimizer_type = optimizer_type
         self.learning_rate = learning_rate
         self.lr_lambda_func = lr_lambda_func
-        
-        # Validation Metric
-        self.val_sdr = torchmetrics.audio.SignalDistortionRatio()
 
 
     def freeze_backbone(self):
@@ -174,23 +172,24 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         self.ss_model.eval()
         with torch.no_grad():
             sep_segment = self.ss_model(input_dict)['waveform']
-            sep_segment = sep_segment.squeeze()
+            sep_segment = sep_segment.squeeze(1) # (batch, samples)
 
-        # Calculate SDR
-        # target: (batch_size, segment_samples), preds: (batch_size, segment_samples)
-        # Move to CPU to avoid CUFFT_INTERNAL_ERROR which sometimes occurs on GPU
-        device = sep_segment.device
-        sep_segment_cpu = sep_segment.detach().cpu()
-        segments_cpu = segments.squeeze().detach().cpu()
+        # Ground truth and mixtures for comparison
+        segments = segments.squeeze(1) # (batch, samples)
+        mixtures = mixtures.squeeze(1) # (batch, samples)
 
-        # Move metric to CPU, calculate, and move back
-        self.val_sdr.to('cpu')
-        sdr_val = self.val_sdr(sep_segment_cpu, segments_cpu)
-        self.val_sdr.to(device)
+        # Calculate metrics using stable torch implementations
+        sdr = calculate_sdr_torch(ref=segments, est=sep_segment)
+        sdr_no_sep = calculate_sdr_torch(ref=segments, est=mixtures)
+        sdri = sdr - sdr_no_sep
+        sisdr = calculate_sisdr_torch(ref=segments, est=sep_segment)
 
-        self.log("val_sdr", sdr_val, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        # Log mean values across the batch
+        self.log("val_sdr", sdr.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log("val_sdri", sdri.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log("val_sisdr", sisdr.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
         
-        return sdr_val
+        return sdr.mean()
 
     def test_step(self, batch, batch_idx):
         pass
