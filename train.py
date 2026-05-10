@@ -274,22 +274,27 @@ def train(args) -> NoReturn:
         pl_model.freeze_backbone()
 
     if resume_checkpoint_path is not None:
-        logging.info(f'Attempting to load checkpoint [{resume_checkpoint_path}]')
-        checkpoint = torch.load(resume_checkpoint_path, map_location='cpu', weights_only=False)
-        
-        # Load state_dict with strict=False to handle architecture changes (e.g. transformer bottleneck)
-        load_result = pl_model.load_state_dict(checkpoint['state_dict'], strict=False)
-        
-        if len(load_result.missing_keys) > 0:
-            logging.warning(f'Missing keys when loading checkpoint: {load_result.missing_keys}')
-        if len(load_result.unexpected_keys) > 0:
-            logging.warning(f'Unexpected keys when loading checkpoint: {load_result.unexpected_keys}')
+        if args.resume:
+            logging.info(f'Hard Resuming from checkpoint: [{resume_checkpoint_path}]')
+            # In hard resume mode, we don't manually load the state_dict.
+            # We let Lightning handle it in trainer.fit(ckpt_path=...)
+            pass
+        else:
+            logging.info(f'Fine-tuning from checkpoint: [{resume_checkpoint_path}]')
+            checkpoint = torch.load(resume_checkpoint_path, map_location='cpu', weights_only=False)
             
-        logging.info(f'Successfully loaded checkpoint [{resume_checkpoint_path}] with strict=False')
-        
-        # We set resume_checkpoint_path to None so that trainer.fit starts from step 0
-        # and doesn't try to restore optimizer/scheduler states which may be incompatible.
-        resume_checkpoint_path = None
+            # Load state_dict with strict=False to handle architecture changes (e.g. transformer bottleneck)
+            load_result = pl_model.load_state_dict(checkpoint['state_dict'], strict=False)
+            
+            if len(load_result.missing_keys) > 0:
+                logging.warning(f'Missing keys when loading checkpoint: {load_result.missing_keys}')
+            if len(load_result.unexpected_keys) > 0:
+                logging.warning(f'Unexpected keys when loading checkpoint: {load_result.unexpected_keys}')
+                
+            logging.info(f'Successfully loaded weights from [{resume_checkpoint_path}] with strict=False')
+            
+            # Reset resume_checkpoint_path to None so trainer.fit starts from step 0
+            resume_checkpoint_path = None
 
     checkpoint_every_n_steps = CheckpointEveryNSteps(
         checkpoints_dir=checkpoints_dir,
@@ -384,6 +389,12 @@ if __name__ == "__main__":
         "--freeze_backbone",
         action="store_true",
         help="Freeze the backbone and only train the transformer bottleneck.",
+    )
+
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Hard resume: restore global step and optimizer state from checkpoint.",
     )
 
     parser.add_argument(
