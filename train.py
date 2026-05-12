@@ -94,6 +94,7 @@ def get_data_module(
     num_workers: int,
     batch_size: int,
     initial_global_step: int = 0,
+    num_steps: int | None = None,
 ) -> DataModule:
     r"""Create data_module. Mini-batch data can be obtained by:
 
@@ -126,6 +127,11 @@ def get_data_module(
     if configs['data'].get('curriculum_manifest'):
         curriculum_config = dict(configs['data'].get('curriculum', {}))
         curriculum_config['initial_global_step'] = initial_global_step
+        if num_steps is not None:
+            curriculum_config['epoch_steps'] = max(
+                int(curriculum_config.get('epoch_steps', 0)),
+                int(num_steps),
+            )
         dataset = CurriculumAudioTextDataset(
             manifest_path=configs['data']['curriculum_manifest'],
             source_embeddings_path=configs['data']['source_embeddings'],
@@ -245,6 +251,8 @@ def train(args) -> NoReturn:
     if resume_checkpoint_path == "":
         resume_checkpoint_path = None
     initial_global_step = get_checkpoint_global_step(resume_checkpoint_path) if args.resume else 0
+    if args.curriculum_start_step is not None:
+        initial_global_step = int(args.curriculum_start_step)
     
     # Get directories and paths
     print(f"Initializing workspace at: {workspace}")
@@ -262,6 +270,7 @@ def train(args) -> NoReturn:
         batch_size=batch_size,
         num_workers=num_workers,
         initial_global_step=initial_global_step,
+        num_steps=args.num_steps,
     )
     
     # model
@@ -436,6 +445,17 @@ if __name__ == "__main__":
         "--resume",
         action="store_true",
         help="Hard resume: restore global step and optimizer state from checkpoint.",
+    )
+
+    parser.add_argument(
+        "--curriculum_start_step",
+        type=int,
+        default=None,
+        help=(
+            "Override the curriculum data schedule step while keeping Lightning "
+            "resume/global_step unchanged. Useful when resuming a checkpoint "
+            "trained before a curriculum schedule fix."
+        ),
     )
 
     parser.add_argument(

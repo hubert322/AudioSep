@@ -1,0 +1,122 @@
+{
+  "inputs": {
+    "original_fsd_dev_json": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/Task_provide_dataset/fsd50k_dev_auto_caption.json",
+    "original_fsd_eval_json": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/Task_provide_dataset/fsd50k_eval_auto_caption.json",
+    "fsd_dev_gt_csv": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/paraphrase/FSD50K.ground_truth/dev.csv",
+    "fsd_eval_gt_csv": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/paraphrase/FSD50K.ground_truth/eval.csv",
+    "original_fsd_auto_captions": true,
+    "embedding_note": "not used; this run reports label/source collision without CLAP thresholds",
+    "pair_samples": 200000,
+    "seed": 1234
+  },
+  "fsd_sources": 51197,
+  "flat_caption_rows": 51197,
+  "exact_duplicate_source_probability": [
+    {
+      "name": "flat caption-row pool",
+      "batch_size": 32,
+      "same_source_pair_probability": 0.0,
+      "same_wav_pair_probability": 0.0,
+      "approx_at_least_one_same_source_neighbor_in_batch": 0.0,
+      "approx_at_least_one_same_wav_neighbor_in_batch": 0.0,
+      "source_key_counts": {
+        "rows": 51197,
+        "unique_keys": 51197,
+        "max_rows_per_key": 1,
+        "duplicate_ordered_pairs": 0,
+        "total_ordered_pairs": 2621081612,
+        "probability": 0.0
+      },
+      "wav_key_counts": {
+        "rows": 51197,
+        "unique_keys": 51197,
+        "max_rows_per_key": 1,
+        "duplicate_ordered_pairs": 0,
+        "total_ordered_pairs": 2621081612,
+        "probability": 0.0
+      }
+    },
+    {
+      "name": "source-level pool",
+      "batch_size": 32,
+      "same_source_pair_probability": 0.0,
+      "same_wav_pair_probability": 0.0,
+      "approx_at_least_one_same_source_neighbor_in_batch": 0.0,
+      "approx_at_least_one_same_wav_neighbor_in_batch": 0.0,
+      "source_key_counts": {
+        "rows": 51197,
+        "unique_keys": 51197,
+        "max_rows_per_key": 1,
+        "duplicate_ordered_pairs": 0,
+        "total_ordered_pairs": 2621081612,
+        "probability": 0.0
+      },
+      "wav_key_counts": {
+        "rows": 51197,
+        "unique_keys": 51197,
+        "max_rows_per_key": 1,
+        "duplicate_ordered_pairs": 0,
+        "total_ordered_pairs": 2621081612,
+        "probability": 0.0
+      }
+    }
+  ],
+  "exact_label_overlap_probability": [
+    {
+      "name": "flat caption-row pool",
+      "rows": 51197,
+      "unique_label_sets": 2819,
+      "one_label_overlap_probability": 0.016298116702823218,
+      "two_label_overlap_probability": 0.00463127662428544,
+      "three_plus_label_overlap_probability": 0.0029267978398224708,
+      "any_label_overlap_probability": 0.023856191166931127
+    },
+    {
+      "name": "source-level pool",
+      "rows": 51197,
+      "unique_label_sets": 2819,
+      "one_label_overlap_probability": 0.016298116702823218,
+      "two_label_overlap_probability": 0.00463127662428544,
+      "three_plus_label_overlap_probability": 0.0029267978398224708,
+      "any_label_overlap_probability": 0.023856191166931127
+    }
+  ],
+  "before": [
+    {
+      "name": "old flat caption-row random FSD50K pairs",
+      "sampled_pairs": 200000,
+      "selected_pairs": 200000,
+      "selected_fraction": 1.0,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.023935,
+      "label_overlap_1_rate": 0.01645,
+      "label_overlap_2_rate": 0.00449,
+      "label_overlap_3plus_rate": 0.002995,
+      "mean_overlapping_labels_when_any": 1.4397326091497806,
+      "collision_rate": 0.023935
+    },
+    {
+      "name": "source-level random FSD50K pairs",
+      "sampled_pairs": 200000,
+      "selected_pairs": 200000,
+      "selected_fraction": 1.0,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.024165,
+      "label_overlap_1_rate": 0.016595,
+      "label_overlap_2_rate": 0.0046,
+      "label_overlap_3plus_rate": 0.00297,
+      "mean_overlapping_labels_when_any": 1.4374094765156218,
+      "collision_rate": 0.024165
+    }
+  ],
+  "similarity_only_max_thresholds": [],
+  "similarity_and_overlap_rejection_max_thresholds": [],
+  "band_similarity_only": [],
+  "band_similarity_and_overlap_rejection": [],
+  "stage_expected_collision": [],
+  "collision_definition": "same source OR same wav OR at least one overlapping specific_labels/labels"
+}

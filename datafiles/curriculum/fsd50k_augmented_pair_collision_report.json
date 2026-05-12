@@ -1,0 +1,503 @@
+{
+  "inputs": {
+    "sources": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/similarity_analysis/curriculum_upload_primary/sources.json",
+    "embeddings": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/similarity_analysis/curriculum_upload_primary/source_primary_embeddings.npy",
+    "original_fsd_auto_captions": false,
+    "embedding_note": "local cache uses one primary caption embedding per source",
+    "pair_samples": 200000,
+    "seed": 1234
+  },
+  "fsd_sources": 51148,
+  "flat_caption_rows": 203708,
+  "exact_duplicate_source_probability": [
+    {
+      "name": "flat caption-row pool",
+      "batch_size": 32,
+      "same_source_pair_probability": 1.4663222183986924e-05,
+      "same_wav_pair_probability": 1.4663222183986924e-05,
+      "approx_at_least_one_same_source_neighbor_in_batch": 0.0004691164805225023,
+      "approx_at_least_one_same_wav_neighbor_in_batch": 0.0004691164805225023,
+      "source_key_counts": {
+        "rows": 203708,
+        "unique_keys": 51148,
+        "max_rows_per_key": 4,
+        "duplicate_ordered_pairs": 608476,
+        "total_ordered_pairs": 41496745556,
+        "probability": 1.4663222183986924e-05
+      },
+      "wav_key_counts": {
+        "rows": 203708,
+        "unique_keys": 51148,
+        "max_rows_per_key": 4,
+        "duplicate_ordered_pairs": 608476,
+        "total_ordered_pairs": 41496745556,
+        "probability": 1.4663222183986924e-05
+      }
+    },
+    {
+      "name": "source-level pool",
+      "batch_size": 32,
+      "same_source_pair_probability": 0.0,
+      "same_wav_pair_probability": 0.0,
+      "approx_at_least_one_same_source_neighbor_in_batch": 0.0,
+      "approx_at_least_one_same_wav_neighbor_in_batch": 0.0,
+      "source_key_counts": {
+        "rows": 51148,
+        "unique_keys": 51148,
+        "max_rows_per_key": 1,
+        "duplicate_ordered_pairs": 0,
+        "total_ordered_pairs": 2616066756,
+        "probability": 0.0
+      },
+      "wav_key_counts": {
+        "rows": 51148,
+        "unique_keys": 51148,
+        "max_rows_per_key": 1,
+        "duplicate_ordered_pairs": 0,
+        "total_ordered_pairs": 2616066756,
+        "probability": 0.0
+      }
+    }
+  ],
+  "exact_label_overlap_probability": [
+    {
+      "name": "flat caption-row pool",
+      "rows": 203708,
+      "unique_label_sets": 2818,
+      "one_label_overlap_probability": 0.016306893539080408,
+      "two_label_overlap_probability": 0.004638061838855978,
+      "three_plus_label_overlap_probability": 0.0029400589459565377,
+      "any_label_overlap_probability": 0.023885014323892922
+    },
+    {
+      "name": "source-level pool",
+      "rows": 51148,
+      "unique_label_sets": 2818,
+      "one_label_overlap_probability": 0.016303005228051604,
+      "two_label_overlap_probability": 0.004635919160772364,
+      "three_plus_label_overlap_probability": 0.0029320635577848382,
+      "any_label_overlap_probability": 0.023870987946608805
+    }
+  ],
+  "before": [
+    {
+      "name": "old flat caption-row random FSD50K pairs",
+      "sampled_pairs": 200000,
+      "selected_pairs": 200000,
+      "selected_fraction": 1.0,
+      "same_source_rate": 2e-05,
+      "same_wav_rate": 2e-05,
+      "duplicate_source_or_wav_rate": 2e-05,
+      "label_overlap_rate": 0.0238,
+      "label_overlap_1_rate": 0.01605,
+      "label_overlap_2_rate": 0.00468,
+      "label_overlap_3plus_rate": 0.00307,
+      "mean_overlapping_labels_when_any": 1.4563025210084033,
+      "collision_rate": 0.0238
+    },
+    {
+      "name": "source-level random FSD50K pairs",
+      "sampled_pairs": 200000,
+      "selected_pairs": 200000,
+      "selected_fraction": 1.0,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0237,
+      "label_overlap_1_rate": 0.015905,
+      "label_overlap_2_rate": 0.004805,
+      "label_overlap_3plus_rate": 0.00299,
+      "mean_overlapping_labels_when_any": 1.4556962025316456,
+      "collision_rate": 0.0237,
+      "similarity": {
+        "mean": 0.11437378823757172,
+        "p05": -0.10701607167720795,
+        "p25": 0.005704686976969242,
+        "p50": 0.0913892537355423,
+        "p75": 0.19094854220747948,
+        "p95": 0.41986105442047106
+      }
+    }
+  ],
+  "similarity_only_max_thresholds": [
+    {
+      "name": "similarity only: sim <= 0.06",
+      "sampled_pairs": 200000,
+      "selected_pairs": 81191,
+      "selected_fraction": 0.405955,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0010222807946693598,
+      "label_overlap_1_rate": 0.0009114310699461763,
+      "label_overlap_2_rate": 9.853308864282987e-05,
+      "label_overlap_3plus_rate": 1.2316636080353733e-05,
+      "mean_overlapping_labels_when_any": 1.1204819277108433,
+      "collision_rate": 0.0010222807946693598,
+      "similarity": {
+        "mean": -0.026301665231585503,
+        "p05": -0.15036863088607788,
+        "p25": -0.06540624424815178,
+        "p50": -0.013212422840297222,
+        "p75": 0.025598407723009586,
+        "p95": 0.053212568163871765
+      }
+    },
+    {
+      "name": "similarity only: sim <= 0.125",
+      "sampled_pairs": 200000,
+      "selected_pairs": 119074,
+      "selected_fraction": 0.59537,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0014360817642810352,
+      "label_overlap_1_rate": 0.0012933134017501721,
+      "label_overlap_2_rate": 0.00013437022355845945,
+      "label_overlap_3plus_rate": 8.398138972403716e-06,
+      "mean_overlapping_labels_when_any": 1.105263157894737,
+      "collision_rate": 0.0014360817642810352,
+      "similarity": {
+        "mean": 0.011312614195048809,
+        "p05": -0.13328562676906586,
+        "p25": -0.03834524843841791,
+        "p50": 0.02323434129357338,
+        "p75": 0.07350012846291065,
+        "p95": 0.11418772675096986
+      }
+    },
+    {
+      "name": "similarity only: sim <= 0.19",
+      "sampled_pairs": 200000,
+      "selected_pairs": 149652,
+      "selected_fraction": 0.74826,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0020313794670301765,
+      "label_overlap_1_rate": 0.0017908213722502874,
+      "label_overlap_2_rate": 0.0002271937561810066,
+      "label_overlap_3plus_rate": 1.3364338598882742e-05,
+      "mean_overlapping_labels_when_any": 1.125,
+      "collision_rate": 0.0020313794670301765,
+      "similarity": {
+        "mean": 0.04083630070090294,
+        "p05": -0.12225706279277801,
+        "p25": -0.020261059049516916,
+        "p50": 0.04940907657146454,
+        "p75": 0.11259166523814201,
+        "p95": 0.17208979874849317
+      }
+    },
+    {
+      "name": "similarity only: sim <= 0.29",
+      "sampled_pairs": 200000,
+      "selected_pairs": 176962,
+      "selected_fraction": 0.88481,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0034866242470134833,
+      "label_overlap_1_rate": 0.0030402007210587586,
+      "label_overlap_2_rate": 0.0004125179417049988,
+      "label_overlap_3plus_rate": 3.390558424972593e-05,
+      "mean_overlapping_labels_when_any": 1.1393841166936791,
+      "collision_rate": 0.0034866242470134833,
+      "similarity": {
+        "mean": 0.07051157206296921,
+        "p05": -0.113579011708498,
+        "p25": -0.005610928172245622,
+        "p50": 0.07215459272265434,
+        "p75": 0.15151575580239296,
+        "p95": 0.24784143120050411
+      }
+    }
+  ],
+  "similarity_and_overlap_rejection_max_thresholds": [
+    {
+      "name": "sim <= 0.06 + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 81108,
+      "selected_fraction": 0.40554,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": -0.026313072070479393,
+        "p05": -0.15037356615066527,
+        "p25": -0.06542221270501614,
+        "p50": -0.01323766354471445,
+        "p75": 0.025594770908355713,
+        "p95": 0.05321143493056297
+      }
+    },
+    {
+      "name": "sim <= 0.125 + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 118903,
+      "selected_fraction": 0.594515,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": 0.011268536560237408,
+        "p05": -0.13330436050891875,
+        "p25": -0.038405317813158035,
+        "p50": 0.023192841559648514,
+        "p75": 0.07343721017241478,
+        "p95": 0.11417518407106399
+      }
+    },
+    {
+      "name": "sim <= 0.19 + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 149348,
+      "selected_fraction": 0.74674,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": 0.040725089609622955,
+        "p05": -0.12230250015854835,
+        "p25": -0.02036522002890706,
+        "p50": 0.049276409670710564,
+        "p75": 0.11245632544159889,
+        "p95": 0.17195131406188008
+      }
+    },
+    {
+      "name": "sim <= 0.29 + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 176345,
+      "selected_fraction": 0.881725,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": 0.07016238570213318,
+        "p05": -0.1136888861656189,
+        "p25": -0.005848005414009094,
+        "p50": 0.07178504765033722,
+        "p75": 0.1509402096271515,
+        "p95": 0.24733459949493403
+      }
+    }
+  ],
+  "band_similarity_only": [
+    {
+      "name": "easy band similarity only",
+      "sampled_pairs": 200000,
+      "selected_pairs": 81191,
+      "selected_fraction": 0.405955,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0010222807946693598,
+      "label_overlap_1_rate": 0.0009114310699461763,
+      "label_overlap_2_rate": 9.853308864282987e-05,
+      "label_overlap_3plus_rate": 1.2316636080353733e-05,
+      "mean_overlapping_labels_when_any": 1.1204819277108433,
+      "collision_rate": 0.0010222807946693598,
+      "similarity": {
+        "mean": -0.026301665231585503,
+        "p05": -0.15036863088607788,
+        "p25": -0.06540624424815178,
+        "p50": -0.013212422840297222,
+        "p75": 0.025598407723009586,
+        "p95": 0.053212568163871765
+      }
+    },
+    {
+      "name": "medium band similarity only",
+      "sampled_pairs": 200000,
+      "selected_pairs": 68461,
+      "selected_fraction": 0.342305,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.00322811527731117,
+      "label_overlap_1_rate": 0.002833730152933787,
+      "label_overlap_2_rate": 0.00037977826791896115,
+      "label_overlap_3plus_rate": 1.4606856458421584e-05,
+      "mean_overlapping_labels_when_any": 1.1266968325791855,
+      "collision_rate": 0.00322811527731117,
+      "similarity": {
+        "mean": 0.12045823782682419,
+        "p05": 0.06569831818342209,
+        "p25": 0.08864322304725647,
+        "p50": 0.1184120774269104,
+        "p75": 0.15110498666763306,
+        "p95": 0.1816152185201645
+      }
+    },
+    {
+      "name": "hard band similarity only",
+      "sampled_pairs": 200000,
+      "selected_pairs": 27310,
+      "selected_fraction": 0.13655,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.011461003295496154,
+      "label_overlap_1_rate": 0.009886488465763456,
+      "label_overlap_2_rate": 0.0014280483339436103,
+      "label_overlap_3plus_rate": 0.00014646649578908824,
+      "mean_overlapping_labels_when_any": 1.1533546325878594,
+      "collision_rate": 0.011461003295496154,
+      "similarity": {
+        "mean": 0.23312462866306305,
+        "p05": 0.19344888851046563,
+        "p25": 0.208193089812994,
+        "p50": 0.22999664396047592,
+        "p75": 0.256394699215889,
+        "p95": 0.2822929427027702
+      }
+    }
+  ],
+  "band_similarity_and_overlap_rejection": [
+    {
+      "name": "easy band + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 81108,
+      "selected_fraction": 0.40554,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": -0.026313072070479393,
+        "p05": -0.15037356615066527,
+        "p25": -0.06542221270501614,
+        "p50": -0.01323766354471445,
+        "p75": 0.025594770908355713,
+        "p95": 0.05321143493056297
+      }
+    },
+    {
+      "name": "medium band + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 68240,
+      "selected_fraction": 0.3412,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": 0.12040461599826813,
+        "p05": 0.06569028720259666,
+        "p25": 0.08859206363558769,
+        "p50": 0.11836085468530655,
+        "p75": 0.15098870545625687,
+        "p95": 0.18154495507478713
+      }
+    },
+    {
+      "name": "hard band + reject same wav/source/labels",
+      "sampled_pairs": 200000,
+      "selected_pairs": 26997,
+      "selected_fraction": 0.134985,
+      "same_source_rate": 0.0,
+      "same_wav_rate": 0.0,
+      "duplicate_source_or_wav_rate": 0.0,
+      "label_overlap_rate": 0.0,
+      "label_overlap_1_rate": 0.0,
+      "label_overlap_2_rate": 0.0,
+      "label_overlap_3plus_rate": 0.0,
+      "mean_overlapping_labels_when_any": 0.0,
+      "collision_rate": 0.0,
+      "similarity": {
+        "mean": 0.2330101728439331,
+        "p05": 0.1934358298778534,
+        "p25": 0.20806920528411865,
+        "p50": 0.22985294461250305,
+        "p75": 0.25622040033340454,
+        "p95": 0.2822385370731354
+      }
+    }
+  ],
+  "stage_expected_collision": [
+    {
+      "name": "full_easy weights",
+      "similarity_only": {
+        "duplicate_source_or_wav_rate": 0.0,
+        "label_overlap_1_rate": 0.001199775932394318,
+        "label_overlap_2_rate": 0.00014071986553424956,
+        "label_overlap_3plus_rate": 1.266016913706391e-05,
+        "label_overlap_rate": 0.0013531559670656313,
+        "collision_rate": 0.0013531559670656313
+      },
+      "with_similarity_and_overlap_rejection": 0.0
+    },
+    {
+      "name": "full_medium weights",
+      "similarity_only": {
+        "duplicate_source_or_wav_rate": 0.0,
+        "label_overlap_1_rate": 0.002385626534424188,
+        "label_overlap_2_rate": 0.0003158581669557473,
+        "label_overlap_3plus_rate": 2.6418688164647544e-05,
+        "label_overlap_rate": 0.0027279033895445826,
+        "collision_rate": 0.0027279033895445826
+      },
+      "with_similarity_and_overlap_rejection": 0.0
+    },
+    {
+      "name": "full_hard weights",
+      "similarity_only": {
+        "duplicate_source_or_wav_rate": 0.0,
+        "label_overlap_1_rate": 0.003379247228155296,
+        "label_overlap_2_rate": 0.00046287195044963193,
+        "label_overlap_3plus_rate": 3.994818515442438e-05,
+        "label_overlap_rate": 0.003882067363759352,
+        "collision_rate": 0.003882067363759352
+      },
+      "with_similarity_and_overlap_rejection": 0.0
+    },
+    {
+      "name": "full_hard_upper weights",
+      "similarity_only": {
+        "duplicate_source_or_wav_rate": 0.0,
+        "label_overlap_1_rate": 0.00392411505209554,
+        "label_overlap_2_rate": 0.0005434099716784775,
+        "label_overlap_3plus_rate": 4.67701891587645e-05,
+        "label_overlap_rate": 0.004514295212932782,
+        "collision_rate": 0.004514295212932782
+      },
+      "with_similarity_and_overlap_rejection": 0.0
+    }
+  ],
+  "collision_definition": "same source OR same wav OR at least one overlapping specific_labels/labels"
+}
