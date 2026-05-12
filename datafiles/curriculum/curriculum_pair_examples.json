@@ -1,0 +1,540 @@
+{
+  "sources": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/similarity_analysis/curriculum_upload_primary/sources.json",
+  "embeddings": "/Users/rex-shih/Documents/2026 Spring/machine listening/final/similarity_analysis/curriculum_upload_primary/source_primary_embeddings.npy",
+  "examples_per_range": 3,
+  "fsd_only": true,
+  "ranges": [
+    {
+      "name": "easy",
+      "min_similarity": null,
+      "max_similarity": 0.06
+    },
+    {
+      "name": "medium",
+      "min_similarity": 0.06,
+      "max_similarity": 0.19
+    },
+    {
+      "name": "hard",
+      "min_similarity": 0.19,
+      "max_similarity": 0.29
+    },
+    {
+      "name": "sim_0.30_0.50",
+      "min_similarity": 0.3,
+      "max_similarity": 0.5
+    },
+    {
+      "name": "sim_0.50_0.70",
+      "min_similarity": 0.5,
+      "max_similarity": 0.7
+    },
+    {
+      "name": "sim_gt_0.70",
+      "min_similarity": 0.7,
+      "max_similarity": 1.01
+    }
+  ],
+  "examples": {
+    "easy": [
+      {
+        "range": "easy",
+        "similarity": -0.028169598430395126,
+        "left": {
+          "source_index": 6101,
+          "source_id": "fsd50k_dev:16257.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "16257.wav",
+          "caption": "A crash cymbal is struck.",
+          "labels": [
+            "Crash_cymbal",
+            "Cymbal"
+          ]
+        },
+        "right": {
+          "source_index": 33215,
+          "source_id": "fsd50k_dev:68058.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "68058.wav",
+          "caption": "A crowd screams and shouts.",
+          "labels": [
+            "Crowd",
+            "Screaming",
+            "Shout"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "easy",
+        "similarity": 0.037301499396562576,
+        "left": {
+          "source_index": 38364,
+          "source_id": "fsd50k_dev:257916.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "257916.wav",
+          "caption": "Fingers are snapping.",
+          "labels": [
+            "Finger_snapping",
+            "Hands"
+          ]
+        },
+        "right": {
+          "source_index": 50839,
+          "source_id": "fsd50k_eval:86346.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "86346.wav",
+          "caption": "Birds chirp, guns fire, someone shouts, and an explosion occurs.",
+          "labels": [
+            "Bird",
+            "Bird_vocalization_and_bird_call_and_bird_song",
+            "Chirp_and_tweet",
+            "Explosion",
+            "Gunshot_and_gunfire",
+            "Shout"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "easy",
+        "similarity": 0.023828046396374702,
+        "left": {
+          "source_index": 18296,
+          "source_id": "fsd50k_dev:322509.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "322509.wav",
+          "caption": "An explosion produces a booming fire sound.",
+          "labels": [
+            "Boom",
+            "Explosion",
+            "Fire"
+          ]
+        },
+        "right": {
+          "source_index": 43337,
+          "source_id": "fsd50k_eval:189332.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "189332.wav",
+          "caption": "A clock ticks to an alarm.",
+          "labels": [
+            "Alarm",
+            "Clock",
+            "Mechanisms",
+            "Tick-tock"
+          ]
+        },
+        "shared_labels": []
+      }
+    ],
+    "medium": [
+      {
+        "range": "medium",
+        "similarity": 0.10033462941646576,
+        "left": {
+          "source_index": 28602,
+          "source_id": "fsd50k_dev:40971.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "40971.wav",
+          "caption": "Gunshots and fireworks explode together.",
+          "labels": [
+            "Explosion",
+            "Fireworks",
+            "Gunshot_and_gunfire"
+          ]
+        },
+        "right": {
+          "source_index": 672,
+          "source_id": "fsd50k_dev:106785.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "106785.wav",
+          "caption": "Traffic noise suggests the movement of vehicles on a road.",
+          "labels": [
+            "Car",
+            "Traffic_noise_and_roadway_noise"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "medium",
+        "similarity": 0.12051496654748917,
+        "left": {
+          "source_index": 1808,
+          "source_id": "fsd50k_dev:119271.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "119271.wav",
+          "caption": "Woodwind music flows harmoniously.",
+          "labels": [
+            "Music",
+            "Musical_instrument",
+            "Wind_instrument_and_woodwind_instrument"
+          ]
+        },
+        "right": {
+          "source_index": 17891,
+          "source_id": "fsd50k_dev:317656.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "317656.wav",
+          "caption": "Liquid gurgles, indicating flow or movement.",
+          "labels": [
+            "Gurgling"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "medium",
+        "similarity": 0.11092688143253326,
+        "left": {
+          "source_index": 36513,
+          "source_id": "fsd50k_dev:97559.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "97559.wav",
+          "caption": "Dishes, pots, and pans create clattering sounds at home.",
+          "labels": [
+            "Dishes_and_pots_and_pans"
+          ]
+        },
+        "right": {
+          "source_index": 31039,
+          "source_id": "fsd50k_dev:50599.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "50599.wav",
+          "caption": "Scissors are cutting.",
+          "labels": [
+            "Scissors"
+          ]
+        },
+        "shared_labels": []
+      }
+    ],
+    "hard": [
+      {
+        "range": "hard",
+        "similarity": 0.1919785439968109,
+        "left": {
+          "source_index": 43458,
+          "source_id": "fsd50k_eval:193060.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "193060.wav",
+          "caption": "Cutlery and dishes clink together softly.",
+          "labels": [
+            "Chink_and_clink",
+            "Cutlery_and_silverware",
+            "Dishes_and_pots_and_pans",
+            "Glass"
+          ]
+        },
+        "right": {
+          "source_index": 21452,
+          "source_id": "fsd50k_dev:354274.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "354274.wav",
+          "caption": "A melodious tune emanates from a string instrument.",
+          "labels": [
+            "Bowed_string_instrument"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "hard",
+        "similarity": 0.261843204498291,
+        "left": {
+          "source_index": 4567,
+          "source_id": "fsd50k_dev:148849.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "148849.wav",
+          "caption": "A bell rings clearly.",
+          "labels": [
+            "Bell"
+          ]
+        },
+        "right": {
+          "source_index": 40698,
+          "source_id": "fsd50k_dev:77928.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "77928.wav",
+          "caption": "A ringtone combines elements of music and alarm.",
+          "labels": [
+            "Alarm",
+            "Keyboard_(musical)",
+            "Ringtone",
+            "Telephone"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "hard",
+        "similarity": 0.22854721546173096,
+        "left": {
+          "source_index": 11861,
+          "source_id": "fsd50k_dev:232935.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "232935.wav",
+          "caption": "An engine produces mechanical noise.",
+          "labels": [
+            "Engine"
+          ]
+        },
+        "right": {
+          "source_index": 51102,
+          "source_id": "fsd50k_eval:98152.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "98152.wav",
+          "caption": "A door squeaks, screeches, and slams in a home.",
+          "labels": [
+            "Door",
+            "Screech",
+            "Slam",
+            "Squeak"
+          ]
+        },
+        "shared_labels": []
+      }
+    ],
+    "sim_0.30_0.50": [
+      {
+        "range": "sim_0.30_0.50",
+        "similarity": 0.3082970976829529,
+        "left": {
+          "source_index": 45429,
+          "source_id": "fsd50k_eval:272357.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "272357.wav",
+          "caption": "A human voice is heard.",
+          "labels": [
+            "Human_voice"
+          ]
+        },
+        "right": {
+          "source_index": 12525,
+          "source_id": "fsd50k_dev:236392.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "236392.wav",
+          "caption": "Whispered voices are softly heard.",
+          "labels": [
+            "Whispering"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "sim_0.30_0.50",
+        "similarity": 0.31303727626800537,
+        "left": {
+          "source_index": 8944,
+          "source_id": "fsd50k_dev:193561.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "193561.wav",
+          "caption": "The bass drum booms deeply.",
+          "labels": [
+            "Bass_drum",
+            "Drum"
+          ]
+        },
+        "right": {
+          "source_index": 43497,
+          "source_id": "fsd50k_eval:19475.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "19475.wav",
+          "caption": "A crash cymbal introduces dramatic percussive elements.",
+          "labels": [
+            "Crash_cymbal",
+            "Cymbal"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "sim_0.30_0.50",
+        "similarity": 0.34427279233932495,
+        "left": {
+          "source_index": 23394,
+          "source_id": "fsd50k_dev:359970.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "359970.wav",
+          "caption": "Melodies flow from a woodwind instrument.",
+          "labels": [
+            "Music",
+            "Musical_instrument",
+            "Wind_instrument_and_woodwind_instrument"
+          ]
+        },
+        "right": {
+          "source_index": 22513,
+          "source_id": "fsd50k_dev:357351.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "357351.wav",
+          "caption": "A trumpet plays boldly.",
+          "labels": [
+            "Brass_instrument",
+            "Trumpet"
+          ]
+        },
+        "shared_labels": []
+      }
+    ],
+    "sim_0.50_0.70": [
+      {
+        "range": "sim_0.50_0.70",
+        "similarity": 0.5687012076377869,
+        "left": {
+          "source_index": 18937,
+          "source_id": "fsd50k_dev:329507.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "329507.wav",
+          "caption": "A guitar produces melodious tunes.",
+          "labels": [
+            "Guitar"
+          ]
+        },
+        "right": {
+          "source_index": 48467,
+          "source_id": "fsd50k_eval:397937.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "397937.wav",
+          "caption": "A harp plays melodious music with gentle plucks.",
+          "labels": [
+            "Harp"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "sim_0.50_0.70",
+        "similarity": 0.5256844758987427,
+        "left": {
+          "source_index": 42128,
+          "source_id": "fsd50k_eval:145362.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "145362.wav",
+          "caption": "A man speaks as something cracks.",
+          "labels": [
+            "Crack",
+            "Male_speech_and_man_speaking"
+          ]
+        },
+        "right": {
+          "source_index": 19577,
+          "source_id": "fsd50k_dev:336623.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "336623.wav",
+          "caption": "Crushing noises occur repeatedly.",
+          "labels": [
+            "Crushing"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "sim_0.50_0.70",
+        "similarity": 0.5485062003135681,
+        "left": {
+          "source_index": 20165,
+          "source_id": "fsd50k_dev:341404.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "341404.wav",
+          "caption": "Coins clink against glass.",
+          "labels": [
+            "Coin_(dropping)",
+            "Glass"
+          ]
+        },
+        "right": {
+          "source_index": 42131,
+          "source_id": "fsd50k_eval:145383.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "145383.wav",
+          "caption": "Keys jangle, creating a domestic sound.",
+          "labels": [
+            "Keys_jangling"
+          ]
+        },
+        "shared_labels": []
+      }
+    ],
+    "sim_gt_0.70": [
+      {
+        "range": "sim_gt_0.70",
+        "similarity": 0.7099395990371704,
+        "left": {
+          "source_index": 41667,
+          "source_id": "fsd50k_eval:122818.wav",
+          "dataset": "fsd50k_eval",
+          "wav": "122818.wav",
+          "caption": "Water flows from a tap.",
+          "labels": [
+            "Water_tap_and_faucet"
+          ]
+        },
+        "right": {
+          "source_index": 10085,
+          "source_id": "fsd50k_dev:206016.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "206016.wav",
+          "caption": "Liquid fills a container.",
+          "labels": [
+            "Fill_(with_liquid)"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "sim_gt_0.70",
+        "similarity": 0.7335430383682251,
+        "left": {
+          "source_index": 12705,
+          "source_id": "fsd50k_dev:236957.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "236957.wav",
+          "caption": "An animal emits a noise.",
+          "labels": [
+            "Animal"
+          ]
+        },
+        "right": {
+          "source_index": 8673,
+          "source_id": "fsd50k_dev:189530.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "189530.wav",
+          "caption": "A bird makes a sound.",
+          "labels": [
+            "Bird"
+          ]
+        },
+        "shared_labels": []
+      },
+      {
+        "range": "sim_gt_0.70",
+        "similarity": 0.7043728828430176,
+        "left": {
+          "source_index": 25024,
+          "source_id": "fsd50k_dev:373684.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "373684.wav",
+          "caption": "An organ is being played.",
+          "labels": [
+            "Keyboard_(musical)",
+            "Organ"
+          ]
+        },
+        "right": {
+          "source_index": 2111,
+          "source_id": "fsd50k_dev:121477.wav",
+          "dataset": "fsd50k_dev",
+          "wav": "121477.wav",
+          "caption": "A wind instrument contributes to an orchestral piece.",
+          "labels": [
+            "Music",
+            "Musical_instrument",
+            "Wind_instrument_and_woodwind_instrument"
+          ]
+        },
+        "shared_labels": []
+      }
+    ]
+  }
+}
