@@ -95,6 +95,8 @@ class CurriculumAudioTextDataset(IterableDataset):
         )
         self.default_min_similarity = self.curriculum.get("min_similarity", None)
         self.default_max_similarity = float(self.curriculum.get("max_similarity", 0.01))
+        total_steps = self.curriculum.get("total_steps", None)
+        self.total_steps = int(total_steps) if total_steps is not None else None
         self.default_pair_bands = self._parse_pair_bands(
             self.curriculum.get("pair_bands", None),
             fallback_min_similarity=self.default_min_similarity,
@@ -144,13 +146,24 @@ class CurriculumAudioTextDataset(IterableDataset):
     def _parse_stages(self, stages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         parsed = []
         cumulative_steps = 0
+        cumulative_portion = 0.0
         for idx, stage in enumerate(stages):
             steps = stage.get("steps", None)
-            if steps is None:
-                end_step = None
-            else:
+            portion = stage.get("portion", stage.get("ratio", stage.get("fraction", None)))
+            if steps is not None:
                 cumulative_steps += int(steps)
                 end_step = cumulative_steps
+            elif portion is not None:
+                if self.total_steps is None or self.total_steps <= 0:
+                    raise ValueError(
+                        "Curriculum stage portions require total_steps. "
+                        "Pass --num_steps to train.py."
+                    )
+                cumulative_portion += float(portion)
+                end_step = int(round(cumulative_portion * self.total_steps))
+                cumulative_steps = end_step
+            else:
+                end_step = None
             stage_min_similarity = stage.get("min_similarity", self.default_min_similarity)
             stage_max_similarity = float(stage.get("max_similarity", self.default_max_similarity))
             parsed.append(

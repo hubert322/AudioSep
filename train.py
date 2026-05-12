@@ -132,6 +132,8 @@ def get_data_module(
                 int(curriculum_config.get('epoch_steps', 0)),
                 int(num_steps),
             )
+            if int(num_steps) > 0:
+                curriculum_config['total_steps'] = int(num_steps)
         dataset = CurriculumAudioTextDataset(
             manifest_path=configs['data']['curriculum_manifest'],
             source_embeddings_path=configs['data']['source_embeddings'],
