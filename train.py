@@ -234,6 +234,8 @@ def train(args) -> NoReturn:
     window_size = configs['model'].get('window_size', 2048)
     hop_size = configs['model'].get('hop_size', 320)
     negative_loss_weight = configs['train'].get('negative_loss_weight', 1.0)
+    gradient_clip_val = float(configs['train'].get('gradient_clip_val', 0.0))
+    gradient_clip_algorithm = configs['train'].get('gradient_clip_algorithm', 'norm')
     
     # Configuration of the trainer
     num_nodes = configs['train']['num_nodes']
@@ -392,6 +394,8 @@ def train(args) -> NoReturn:
         enable_checkpointing=False,
         enable_progress_bar=True,
         enable_model_summary=True,
+        gradient_clip_val=gradient_clip_val,
+        gradient_clip_algorithm=gradient_clip_algorithm,
     )
 
     # Fit, evaluate, and save checkpoints.

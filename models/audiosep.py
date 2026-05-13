@@ -159,7 +159,25 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         else:
             loss = self.loss_function(output_dict, target_dict)
 
+        batch_size = target_dict["segment"].size(0)
+        sep_finite_ratio = torch.isfinite(sep_segment.detach()).float().mean()
+        loss_is_finite = torch.isfinite(loss.detach())
+        if sep_finite_ratio.item() < 1.0 or not bool(loss_is_finite.item()):
+            finite_sep = torch.where(
+                torch.isfinite(sep_segment.detach()),
+                sep_segment.detach(),
+                torch.zeros_like(sep_segment.detach()),
+            )
+            raise FloatingPointError(
+                "Non-finite training value detected at "
+                f"global_step={self.global_step}, batch_idx={batch_idx}, "
+                f"sep_finite_ratio={sep_finite_ratio.item():.6f}, "
+                f"finite_sep_abs_max={finite_sep.abs().max().item():.6f}, "
+                f"loss={loss.detach().item() if bool(loss_is_finite.item()) else 'nan'}"
+            )
+
         log_dict = {"train_loss": loss}
+        log_dict["train_sep_finite_ratio"] = sep_finite_ratio
         if 'is_negative' in batch_audio_text_dict:
             log_dict["train_negative_ratio"] = batch_audio_text_dict['is_negative'].float().mean()
         if 'pair_similarity' in batch_audio_text_dict:
@@ -170,7 +188,7 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
             log_dict["train_easy_pair_ratio"] = batch_audio_text_dict['is_easy_pair'].float().mean()
         if 'is_medium_pair' in batch_audio_text_dict:
             log_dict["train_medium_pair_ratio"] = batch_audio_text_dict['is_medium_pair'].float().mean()
-        self.log_dict(log_dict)
+        self.log_dict(log_dict, batch_size=batch_size)
         
         return loss
 
@@ -212,17 +230,37 @@ class AudioSep(pl.LightningModule, PyTorchModelHubMixin):
         # Ground truth and mixtures for comparison
         segments = segments.squeeze(1) # (batch, samples)
         mixtures = mixtures.squeeze(1) # (batch, samples)
+        batch_size = segments.size(0)
+        sep_finite_ratio = torch.isfinite(sep_segment).float().mean()
 
         # Calculate metrics using stable torch implementations
-        sdr = calculate_sdr_torch(ref=segments, est=sep_segment)
-        sdr_no_sep = calculate_sdr_torch(ref=segments, est=mixtures)
+        sep_segment_for_metrics = torch.nan_to_num(
+            sep_segment, nan=0.0, posinf=0.0, neginf=0.0
+        )
+        segments_for_metrics = torch.nan_to_num(
+            segments, nan=0.0, posinf=0.0, neginf=0.0
+        )
+        mixtures_for_metrics = torch.nan_to_num(
+            mixtures, nan=0.0, posinf=0.0, neginf=0.0
+        )
+        sdr = calculate_sdr_torch(ref=segments_for_metrics, est=sep_segment_for_metrics)
+        sdr_no_sep = calculate_sdr_torch(ref=segments_for_metrics, est=mixtures_for_metrics)
         sdri = sdr - sdr_no_sep
-        sisdr = calculate_sisdr_torch(ref=segments, est=sep_segment)
+        sisdr = calculate_sisdr_torch(ref=segments_for_metrics, est=sep_segment_for_metrics)
+        metric_finite_ratio = torch.stack(
+            [
+                torch.isfinite(sdr).float().mean(),
+                torch.isfinite(sdri).float().mean(),
+                torch.isfinite(sisdr).float().mean(),
+            ]
+        ).mean()
 
         # Log mean values across the batch
-        self.log("val_sdr", sdr.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
-        self.log("val_sdri", sdri.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
-        self.log("val_sisdr", sisdr.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log("val_sdr", sdr.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True, batch_size=batch_size)
+        self.log("val_sdri", sdri.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True, batch_size=batch_size)
+        self.log("val_sisdr", sisdr.mean(), on_step=False, on_epoch=True, prog_bar=True, sync_dist=True, batch_size=batch_size)
+        self.log("val_sep_finite_ratio", sep_finite_ratio, on_step=False, on_epoch=True, sync_dist=True, batch_size=batch_size)
+        self.log("val_metric_finite_ratio", metric_finite_ratio, on_step=False, on_epoch=True, sync_dist=True, batch_size=batch_size)
         
         return sdr.mean()
 

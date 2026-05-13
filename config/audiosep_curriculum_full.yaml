@@ -121,6 +121,8 @@ train:
     num_workers: 6
     loss_type: l1_wav
     negative_loss_weight: 0.5
+    gradient_clip_val: 1.0
+    gradient_clip_algorithm: norm
     sync_batchnorm: True
     use_distributed_sampler: False
     batch_size_per_device: 32
